@@ -1,0 +1,24 @@
+<%- include('./partials/header.ejs') %>
+<form class="form-signin" method="post" action="/register">
+
+    <img class="img-thumbnail umaLogo" src="https://www.satae.pt/wp-content/uploads/2020/08/UnivMadeira.jpg" alt="Logo img" width="72" height="72">
+    <h1 class="h3 mb-3 font-weight-normal">Please register</h1>
+
+    <label for="inputUsername" class="sr-only">Username</label>
+    <input name="username" type="text" id="inputUsername" class="form-control form-middle" placeholder="Username" required>
+
+    <label for="inputPassword" class="sr-only">Password</label>
+    <input name="password" type="password" id="inputPassword" class="form-control form-middle" placeholder="Password" required>
+
+    <label for="inputPicture" class="sr-only">Password</label>
+    <input type="file" accept="image/jpeg,image/png"  id="inputPicture" class="form-control form-bottom" placeholder="Password" required>
+    
+    <img id="imageAdded" class="form-control" src="" hidden>
+
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+    <p class="mt-5 mb-3 text-muted">@ UMa 2021</p>
+</form>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="./index.js"></script>
+<%- include('./partials/footer.ejs') %>
