@@ -1,6 +1,3 @@
-
-
-
 function checkFile(input) {
     var file = input.files[0];
     var fileType = file["type"];

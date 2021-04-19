@@ -5,7 +5,7 @@ var db;
 module.exports = {
     connect: function (callback) {
         //Insert the connection string which was shared with you in moodle
-        MongoClient.connect('mongodb+srv://G21:qllJUdwX3wvEkLNJ@clusterdbw.1dbjr.mongodb.net/G21?authSource=admin&replicaSet=atlas-bek8xj-shard-0&w=majority&readPreference=primary&appname=MongoDB%20Compass&retryWrites=true&ssl=true',
+        MongoClient.connect('mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass%20Community&ssl=false',
             { useNewUrlParser: true, useUnifiedTopology: true },function (err, database) {
             console.log('Connected the database on port 27017');
             db = database.db('G21');
