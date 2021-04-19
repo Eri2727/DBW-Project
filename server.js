@@ -1,140 +1,164 @@
+//modules
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoConfigs = require('./model/mongoConfigs');
 const url = require('url');
 const ejs = require('ejs');
-const crypto = require('crypto');
 const multer = require('multer');
-const upload = multer({dest: 'uploads/'});
 const session = require('express-session');
 const passport = require('passport');
-const LocalStrategy = require('passport-local');
+const passportLocalMongoose = require('passport-local-mongoose');
 const cookieParser = require('cookie-parser');
-const urlencodedParser = bodyParser.urlencoded({extended:false});
+const uniqueFilename = require('unique-filename')
+const fs = require('fs');
+const path = require('path');
+
+//Multer setup for storing uploaded files
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads')
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.fieldname + '-' + Date.now())
+    }
+});
+
+const upload = multer({ storage: storage });
+
+//----------------------------------------------------
+
 const app = express();
-const title = 'Messenger';
-const funct = require('./function.js');
 
-var db;
-
-app.use(urlencodedParser);
+app.use(bodyParser.urlencoded({extended:false}));
 app.use(express.static("./public"));
 app.set('view engine', 'ejs');
-app.use(cookieParser());
-app.use(express.session({ secret: 'supernova' }));
+
+
+app.use(session({
+    secret: "supernova",
+    resave: false,
+    saveUninitialized: false
+}));
+
 app.use(passport.initialize());
 app.use(passport.session());
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Session-persisted message middleware
-app.use(function(req, res, next){
-    var err = req.session.error,
-        msg = req.session.notice,
-        success = req.session.success;
+mongoConfigs.connect();
 
-    delete req.session.error;
-    delete req.session.success;
-    delete req.session.notice;
+//pull mongoose from mongo_configs
+const mongoose = mongoConfigs.mongoose;
 
-    if (err) res.locals.error = err;
-    if (msg) res.locals.notice = msg;
-    if (success) res.locals.success = success;
-
-    next();
+const imageSchema = new mongoose.Schema({
+    name: String,
+    originalName: String,
+    img:
+        {
+            data: Buffer,
+            contentType: String
+        }
 });
 
-mongoConfigs.connect(function(err){
-    if(!err){
-        db = mongoConfigs.getDB();
-    }
+const Image = new mongoose.model("Image", imageSchema);
+
+const userSchema = new mongoose.Schema({
+    username: String,
+    password: String,
+    imageName: String
 });
 
-app.get("/", function (req, res){
-    res.render('index');
+userSchema.plugin(passportLocalMongoose);
+
+const User = new mongoose.model("User", userSchema);
+
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+//Testing
+app.get('/', (req, res) => {
+    res.redirect("/index");
 });
 
 app.get("/login", function (req, res){
-    res.render('login');
+    if(req.isAuthenticated()){
+        res.render("index");
+    } else {
+        res.render("login");
+    }
 });
 
-app.post("/login", passport.authenticate('local-signin', {
-    successRedirect: '/',
-    failureRedirect: '/login',
-}));
-
-app.get("/register", function(req, res){
-   res.render('register');
+app.get("/register", function (req, res){
+    if(req.isAuthenticated()){
+        res.render("index");
+    } else {
+        res.render('register');
+    }
 });
 
-app.post("/register", upload.single('image'), passport.authenticate('local-signup', {
-    successRedirect: '/',
-    failureRedirect: '/register',
-}));//upload.single('image'),
+app.get("/index", function(req, res){
+    if(req.isAuthenticated()){
+        res.render("index");
+    } else {
+        res.render("login");
+    }
+});
 
+app.post("/register", upload.single('image'), function (req, res){
 
-/*app.post("/register", upload.single('image'), function(req, res){ //'local-signup'
+    const imageName = uniqueFilename("./uploads")
 
-    const newUser = {
-        username: req.body.username,
-        // This is the SHA256 hash for value of `password`
-        password: getHashedPassword(req.body.password),
-
-        image: req.file,
+    const image = {
+        name: imageName,
+        originalName: req.file.filename,
+        img: {
+            data: fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename)),
+            contentType: 'image/png'
+        }
     }
 
-    const usersCollection = db.collection('users');
-
-    usersCollection.findOne({username: newUser.username})
-        .then(function (result) {
-            if (result != null) {
-                console.log('EXISTE CABRON');
-                deferred
-            }
-        });
-
-    usersCollection.insertOne(newUser);
-    //todo: check if the user is already registered
-
-    res.render('index', {
-        title: title
+    Image.create(image, (err, item) => {
+        if (err) {
+            console.log(err);
+        }
     });
 
-});*/
-
-// Passport session setup.
-passport.serializeUser(function(user, done) {
-    console.log("serializing " + user.username);
-    done(null, user);
-});
-
-passport.deserializeUser(function(obj, done) {
-    console.log("deserializing " + obj);
-    done(null, obj);
-});
-
-passport.use('local-signup', new LocalStrategy(
-        {passReqToCallback : true},
-        function (req, username, password, done) {
-            funct.localRegistration(username, password, done)
-                .then(function (user) {
-                    if (user) {
-                        console.log("REGISTERED: " + user.username);
-                        req.session.success = 'You are successfully registered and logged in ' + user.username + '!';
-                        done(null, user);
-                    }
-                    if (!user) {
-                        console.log("COULD NOT REGISTER");
-                        req.session.error = 'That username is already in use, please try a different one.'; //inform user could not log them in
-                        done(null, user);
-                    }
-                })
-                .fail(function (err){
-                    console.log(err + '????');
-                });
+    User.register({username: req.body.username, imageName: imageName}, req.body.password, function(err, user){
+        if(err){
+            console.log(err);
+            res.redirect("/register");
+        } else {
+            User.updateOne({_id: user._id}, {imageName: imageName});
+            passport.authenticate("local")(req,res, function(){
+                res.redirect("/index");
+            });
         }
-    )
-);
+    });
+
+});
+
+app.post("/login", function (req, res){
+
+    const user = new User({
+        username: req.body.username,
+        password: req.body.password
+    });
+
+    req.login(user, function(err){
+        if(err) {
+            console.log(err);
+        } else {
+            passport.authenticate("local")(req,res, function(){
+                res.redirect("secrets");
+            });
+            res.redirect("/login");
+        }
+    });
+
+});
 
 app.listen(process.env.PORT || 3000,function(){
     console.log("Express web server listening on port 3000");
