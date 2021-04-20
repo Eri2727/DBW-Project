@@ -43,13 +43,12 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-
 mongoConfigs.connect();
+
 
 //pull mongoose from mongo_configs
 const mongoose = mongoConfigs.mongoose;
+mongoose.set('useCreateIndex', true)
 
 const imageSchema = new mongoose.Schema({
     name: String,
@@ -75,8 +74,13 @@ const User = new mongoose.model("User", userSchema);
 
 passport.use(User.createStrategy());
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.serializeUser(function(User, done) {
+    done(null, User);
+});
+
+passport.deserializeUser(function(User, done) {
+    done(null, User);
+});
 
 //Testing
 app.get('/', (req, res) => {
@@ -105,6 +109,11 @@ app.get("/index", function(req, res){
     } else {
         res.render("login");
     }
+});
+
+app.get('/logout', function(req, res){
+    req.logout();
+    res.redirect('/');
 });
 
 app.post("/register", upload.single('image'), function (req, res){
@@ -152,9 +161,8 @@ app.post("/login", function (req, res){
             console.log(err);
         } else {
             passport.authenticate("local")(req,res, function(){
-                res.redirect("secrets");
+                res.render("index");
             });
-            res.redirect("/login");
         }
     });
 
