@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const mongoConfigs = require('./model/mongoConfigs');
 const url = require('url');
 const ejs = require('ejs');
-const multer = require('multer');
 const session = require('express-session');
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
@@ -14,17 +13,7 @@ const fs = require('fs');
 const path = require('path');
 const User = require('./model/user')
 
-//Multer setup for storing uploaded files
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads')
-    },
-    filename: (req, file, cb) => {
-        cb(null, file.fieldname + '-' + Date.now())
-    }
-});
-
-const upload = multer({ storage: storage });
+const upload = require('./model/multerConfigs')
 
 //----------------------------------------------------
 
@@ -33,7 +22,6 @@ const app = express();
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(express.static("./public"));
 app.set('view engine', 'ejs');
-
 
 app.use(session({
     secret: "supernova",
@@ -45,7 +33,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 mongoConfigs.connect();
-
 
 //pull mongoose from mongo_configs
 const mongoose = mongoConfigs.mongoose;
@@ -101,7 +88,8 @@ app.post("/register", upload.single('image'), function (req, res){
 
     User.register({username: req.body.username, image: image}, req.body.password, function(err, user){
         if(err){
-            console.log(err);
+            console.log(err.toString().slice(17));// This way only A user with the given username is already registered appears
+
             res.redirect("/register");
         } else {
             passport.authenticate('local'),
@@ -115,33 +103,8 @@ app.post("/register", upload.single('image'), function (req, res){
 
 app.post("/login", passport.authenticate('local', {
     successRedirect: "/",
-    failureRedirect: "/register"
-}),function(){
-    console.log("Success");
-});
-
-
-// app.post("/login", function (req, res){
-//
-//     const user = new User({
-//         username: req.body.username,
-//         password: req.body.password
-//     });
-//
-//     req.login(user, function(err){
-//         if(err) {
-//             console.log(err);
-//         } else {
-//             passport.authenticate("local", {
-//                 successRedirect: '/',
-//                 failureRedirect: '/register'
-//             }) (req,res, function(){
-//                 //res.render("index");
-//             });
-//         }
-//     });
-//
-// });
+    failureRedirect: "/login"
+}));
 
 app.listen(process.env.PORT || 3000,function(){
     console.log("Express web server listening on port 3000");
