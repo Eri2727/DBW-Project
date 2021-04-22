@@ -60,12 +60,10 @@ const imageSchema = new mongoose.Schema({
         }
 });
 
-const Image = new mongoose.model("Image", imageSchema);
-
 const userSchema = new mongoose.Schema({
     username: String,
     password: String,
-    imageName: String
+    image: imageSchema
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -82,9 +80,14 @@ passport.deserializeUser(function(User, done) {
     done(null, User);
 });
 
-//Testing
+
 app.get('/', (req, res) => {
-    res.redirect("/index");
+    if(req.isAuthenticated()){
+        res.render("index");
+    } else {
+        res.render("login");
+    }
+
 });
 
 app.get("/login", function (req, res){
@@ -100,14 +103,6 @@ app.get("/register", function (req, res){
         res.render("index");
     } else {
         res.render('register');
-    }
-});
-
-app.get("/index", function(req, res){
-    if(req.isAuthenticated()){
-        res.render("index");
-    } else {
-        res.render("login");
     }
 });
 
@@ -128,26 +123,28 @@ app.post("/register", upload.single('image'), function (req, res){
             contentType: 'image/png'
         }
     }
+    console.log(req.body)
+    // Image.create(image, (err, item) => {
 
-    Image.create(image, (err, item) => {
-        if (err) {
-            console.log(err);
-        }
-    });
+    //     if (err) {
+    //         console.log(err);
+    //     }
+    // });
 
-    User.register({username: req.body.username, imageName: imageName}, req.body.password, function(err, user){
+    User.register({username: req.body.username, image: image}, req.body.password, function(err, user){
         if(err){
             console.log(err);
             res.redirect("/register");
         } else {
-            User.updateOne({_id: user._id}, {imageName: imageName});
-            passport.authenticate("local")(req,res, function(){
-                res.redirect("/index");
+            passport.authenticate("local", {
+                failureFlash: 'Invalid username or password.' }) (req,res, function(){
+                res.redirect("/");
             });
         }
     });
 
 });
+
 
 app.post("/login", function (req, res){
 
@@ -160,8 +157,11 @@ app.post("/login", function (req, res){
         if(err) {
             console.log(err);
         } else {
-            passport.authenticate("local")(req,res, function(){
-                res.render("index");
+            passport.authenticate("local", {
+                successRedirect: '/',
+                failureRedirect: '/register'
+            }) (req,res, function(){
+                //res.render("index");
             });
         }
     });
