@@ -87,18 +87,17 @@ app.post("/register", upload.single('image'), function (req, res){
     }
 
     User.register({username: req.body.username, image: image}, req.body.password, function(err, user){
-        if(err){
-            console.log(err.toString().slice(17));// This way only A user with the given username is already registered appears
 
+        if(err){
+            //Use this on the register page
+            //const msg = err.toString().slice(17);// This way only A user with the given username is already registered appears
             res.redirect("/register");
         } else {
-            passport.authenticate('local'),
-                function(req, res) {
+            passport.authenticate("local")(req,res, function(){
                 res.redirect("/");
-            };
+            });
         }
     });
-
 });
 
 app.post("/login", passport.authenticate('local', {

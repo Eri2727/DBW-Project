@@ -12,7 +12,7 @@ const chatSchema = new mongoose.Schema({ //group of messages and people
     date: Date, //date in which group was created
     users: [String], //usernames of people belonging to the group
     messages: [messageSchema]
-})
+});
 
 const chat = new mongoose.model("chat", chatSchema);
 
