@@ -1,0 +1,22 @@
+<%- include ('../partials/app.ejs') %>
+<div class="container py-5">
+    <form class="" action="/chat" method="POST">
+        <p>Invite users to chat with you</p>
+        <ul class="list-unstyled">
+            <% users.forEach(function(user) { %>
+                <li>
+                    <div class="checkbox">
+                        <label for="user-<%= user._id %>">
+                            <input type="checkbox" class="me-2" id="user-<%= user._id %>" name="users[]"
+                                   value="<%= user._id %>"><%= user.username %>
+                        </label>
+                    </div>
+                </li>
+            <% }); %>
+        </ul>
+        <div>
+            <button type="submit" class="btn btn-primary">Create chat</button>
+        </div>
+    </form>
+</div>
+<%- include ('../partials/app-close-body.ejs') %>
