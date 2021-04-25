@@ -99,3 +99,14 @@ body {
     box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
 }
 
+.newConversationButton {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    border: 0;
+    background-color: inherit;
+}
+
+.position-sticky {
+    height: 100%;
+}

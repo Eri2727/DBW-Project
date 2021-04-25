@@ -5,6 +5,7 @@ function checkFile(input) {
 
     if ($.inArray(fileType, validImageTypes) < 0) {
         alert("Invalid File. Please attach a valid .png or .jpeg file.");
+        $("#inputImage").val(null);
         location.reload();
     }
 
@@ -21,7 +22,7 @@ function checkFile(input) {
     }
 }
 
-$("#inputPicture").change(function(){
+$("#inputImage").change(function(){
     checkFile(this);
 
 });
