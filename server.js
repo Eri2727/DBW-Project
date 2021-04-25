@@ -1,7 +1,7 @@
 //modules
 const express = require('express');
 const bodyParser = require('body-parser');
-const mongoConfigs = require('./model/mongoConfigs');
+const mongoConfigs = require('./controller/mongoConfigs');
 const url = require('url');
 const ejs = require('ejs');
 const session = require('express-session');
@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 const User = require('./model/user')
 
-const upload = require('./model/multerConfigs')
+const upload = require('./controller/multerConfigs')
 
 //----------------------------------------------------
 
