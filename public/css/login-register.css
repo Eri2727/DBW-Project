@@ -75,3 +75,7 @@ body {
 #imageAdded{
 
 }
+
+.registerError {
+    color: red;
+}

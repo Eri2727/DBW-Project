@@ -62,9 +62,9 @@ app.get("/login", function (req, res){
 
 app.get("/register", function (req, res){
     if(req.isAuthenticated()){
-        res.render("index");
+        res.redirect("/");
     } else {
-        res.render('register');
+        res.render('register', {error: ""});
     }
 });
 
@@ -90,8 +90,8 @@ app.post("/register", upload.single('image'), function (req, res){
 
         if(err){
             //Use this on the register page
-            //const msg = err.toString().slice(17);// This way only A user with the given username is already registered appears
-            res.redirect("/register");
+            const msg = "Username already in use";
+            res.render("register", {error: msg});
         } else {
             passport.authenticate("local")(req,res, function(){
                 res.redirect("/");
