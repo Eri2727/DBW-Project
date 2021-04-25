@@ -11,7 +11,7 @@
     <input name="password" type="password" id="inputPassword" class="form-control form-middle" placeholder="Password" required>
 
     <label for="image" class="sr-only">Upload Image</label>
-    <input type="file" id="inputImage" name="image" value="" required>
+    <input type="file" id="inputImage" name="image" onchange="checkFile(this)" value="" required>
 
     <img id="imageAdded" class="form-control" src="" hidden>
 

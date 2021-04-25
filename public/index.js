@@ -22,7 +22,7 @@ function checkFile(input) {
     }
 }
 
-$("#inputImage").change(function(){
-    checkFile(this);
-
-});
+// $("#inputImage").change(function(){
+//     checkFile(this);
+//
+// });
