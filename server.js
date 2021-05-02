@@ -1,6 +1,10 @@
 //modules
 const express = require('express');
+const app = express();
 const bodyParser = require('body-parser');
+const http = require('http');
+const server =http.createServer(app);
+const io = require('socket.io')(server);
 const mongoConfigs = require('./controller/mongoConfigs');
 const url = require('url');
 const ejs = require('ejs');
@@ -11,13 +15,11 @@ const cookieParser = require('cookie-parser');
 const uniqueFilename = require('unique-filename')
 const fs = require('fs');
 const path = require('path');
-const User = require('./model/user')
+const User = require('./model/user');
 
 const upload = require('./controller/multerConfigs')
 
 //----------------------------------------------------
-
-const app = express();
 
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(express.static("./public"));
@@ -45,7 +47,7 @@ passport.deserializeUser(User.deserializeUser());
 
 app.get('/', (req, res) => {
     if(req.isAuthenticated()){
-        res.render("index");
+        res.render("index", {image: req.user.image});
     } else {
         res.render("login");
     }
@@ -100,11 +102,33 @@ app.post("/register", upload.single('image'), function (req, res){
     });
 });
 
+
 app.post("/login", passport.authenticate('local', {
     successRedirect: "/",
     failureRedirect: "/login"
 }));
 
-app.listen(process.env.PORT || 3000,function(){
+io.on('connection',function(socket){
+    console.log("connection on");
+
+    socket.on('request usernames',function(){
+        const usernames = [];
+
+        User.find({}, function(err, users){
+
+            users.forEach(function(user){
+                usernames.push(user.username);
+                console.log(usernames);
+            });
+
+            console.log(usernames);
+
+            io.emit("response usernames", usernames);
+        });
+
+    })
+});
+
+server.listen(process.env.PORT || 3000,function(){
     console.log("Express web server listening on port 3000");
 });
