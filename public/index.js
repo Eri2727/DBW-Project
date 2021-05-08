@@ -32,10 +32,17 @@ $('.closeNewChat').on('click', () => {
     usernames.splice(0,usernames.length) //clears the array (usernames =[]) -> splice(index of where to start, number of items to delete)
     $('#addedUsers .list-group').html(''); //clears the stuff inside the div
     $('#newChatUsernameInput').val(''); //clears the username input
-
+    $('.search-error-message').html(''); //removes error message
 });
 
-//when you add a user
+//if esc is pressed popup closes and triggers a click on the close
+$('#newChat').on('keydown', function(event){
+   if(event.key === 'Escape'){
+       $('.closeNewChat').trigger('click');
+   }
+});
+
+//when you add a user it checks if its valid and adds it to the list
 $('#addUserButton').on('click', () => {
 
     const usernameInput = $('#newChatUsernameInput').val(); //gets the username to be added
@@ -46,10 +53,15 @@ $('#addUserButton').on('click', () => {
     socket.once("response usernames",function(data){
 
 
+
         const usernameList = data.usernames;
 
         if(data.currUser === usernameInput){
-            alert("You can't add yourself");
+
+            $('.search-error-message').html('<div class="alert alert-danger" role="alert">' +
+                '  You can\'t add yourself' +
+                '</div>');
+
 
         } else if(usernameList.includes(usernameInput)){
             $('#newChatUsernameInput').val(''); //clears the username input
@@ -62,33 +74,55 @@ $('#addUserButton').on('click', () => {
                 "                        </li>");
 
         } else {
-            txt="User does not exist";
-
+            $('.search-error-message').html("<div class=\"alert alert-warning\" role=\"alert\">" +
+                "  User does not exist" +
+                "</div>");
         }
     });
 
 
 });
 
+$("#newChatUsernameInput").on('keydown', function(event){
+    if(event.key == 'Backspace') {
+        $('.search-error-message').html('');
+    }
+});
 
+//if Enter is clicked whilst inside text input then it triggers a click on the add user button
+$("#newChatUsernameInput").on('keydown', function(event){
+   if(event.key == 'Enter') {
+       event.preventDefault();
+       $('#addUserButton').trigger('click');
+   }
+});
 
-$("#searchUser").on("keyup" ,function (){ //when is typing trigger
+$("#newChatUsernameInput").on("focus" ,function (event){ //when is typing trigger
 
-    if($("#searchUser").val().length === 1) //if user just started typing, this way it wont always be emitting the request
-        socket.emit("request usernames");
+    socket.emit("request usernames");
 
     // when the usernames are received
-    socket.on("response usernames",function(data){
+    socket.once("response usernames", function (data) {
 
         const usernameList = data.usernames;
 
-        //puts every username as a recomendation
-        $("#searchUser").attr("list", usernameList);
-    });
+        //removes self from list of recommendations
+        // const indexOfSelf = usernameList.indexOf(data.currUser);
+        // usernameList.splice(indexOfSelf, 1);
 
+        let datalist = '';
+        usernameList.forEach(element => {
+            datalist += '<option>' + element + '</option>';
+        });
+        $(".input-group #userList").html('');
+        //puts every username as a recommendation
+        $(".input-group #userList").html(datalist);
+        // $("#newChatUsernameInput").attr("list", usernameList);
+    });
 
 });
 
-
+//selector works
+$('input[type="checkbox"]').css('background-color', 'red');
 
 

@@ -23,23 +23,21 @@
             <div class="modal-body">
 
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Username" id="newChatUsernameInput" aria-label="username" aria-describedby="button-addon2">
+                    <input type="text" class="form-control" placeholder="Username" id="newChatUsernameInput" aria-label="username" aria-describedby="button-addon2" list="userList">
                     <button class="btn btn-outline-secondary" type="button" id="addUserButton">Add User</button>
+                    <datalist id="userList">
+
+                    </datalist>
+                </div>
+
+                <div class="search-error-message">
+
                 </div>
 
                 <div id="addedUsers">
                     <ul class="list-group">
-
                     </ul>
                 </div>
-
-                <!--<div class="input-group mb-3">
-                    <span class="input-group-text" id="addon-wrapping">@</span>
-                    <input type="text" class="form-control" aria-label="Text input with checkbox">
-                    <div class="input-group-text">
-                        <input class="form-check-input mt-0" type="checkbox" value="" aria-label="Checkbox for following text input">
-                    </div>
-                </div>-->
 
             </div>
             <div class="modal-footer">
