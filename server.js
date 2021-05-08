@@ -1,48 +1,71 @@
 //modules
+
+//EXPRESS--------------------------
 const express = require('express');
 const app = express();
+//---------------------------------
+
 const bodyParser = require('body-parser');
+
+//SERVER------------------------------------------------------------
 const http = require('http');
 const server =http.createServer(app);
-const io = require('socket.io')(server);
-const mongoConfigs = require('./controller/mongoConfigs');
-const url = require('url');
-const ejs = require('ejs');
-const session = require('express-session');
+//------------------------------------------------------------------
+
+//MODELS----------------------------------------------
+const mongoConfigs = require('./model/mongoConfigs');
+const User = require('./model/user');
+const upload = require('./model/multerConfigs')
+//----------------------------------------------------
+
+//AUTHENTICATION
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
-const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const cookieParser = require('cookie-parser'); //Not sure if this one is being used or not
+//
+
+const url = require('url');
+const ejs = require('ejs');
+
+//FILES------------------------------------------
 const uniqueFilename = require('unique-filename')
 const fs = require('fs');
 const path = require('path');
-const User = require('./model/user');
+//-----------------------------------------------
 
-const upload = require('./controller/multerConfigs')
-
-//----------------------------------------------------
-
+//APP.USE's--------------------------------------
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(express.static("./public"));
 app.set('view engine', 'ejs');
 
-app.use(session({
+const sessionMiddleware = session({
     secret: "supernova",
     resave: false,
     saveUninitialized: false
-}));
+})
+
+app.use(sessionMiddleware);
 
 app.use(passport.initialize());
 app.use(passport.session());
+//------------------------------------------------
 
+//connects to the database with mongoose
 mongoConfigs.connect();
 
 //pull mongoose from mongo_configs
 const mongoose = mongoConfigs.mongoose;
+
 mongoose.set('useCreateIndex', true)
 
+//passport uses the standart strategy
 passport.use(User.createStrategy());
 
+//serializes is User info into a "key"
 passport.serializeUser(User.serializeUser());
+
+//deserializes "key" into a user object
 passport.deserializeUser(User.deserializeUser());
 
 app.get('/', (req, res) => {
@@ -108,6 +131,23 @@ app.post("/login", passport.authenticate('local', {
     failureRedirect: "/login"
 }));
 
+const io = require('socket.io')(server);
+
+// convert a connect middleware to a Socket.IO middleware
+const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
+
+io.use(wrap(sessionMiddleware));
+io.use(wrap(passport.initialize()));
+io.use(wrap(passport.session()));
+
+io.use((socket, next) => {
+    if (socket.request.user) {
+        next();
+    } else {
+        next(new Error('unauthorized'))
+    }
+});
+
 io.on('connection',function(socket){
     console.log("connection on");
 
@@ -118,12 +158,16 @@ io.on('connection',function(socket){
 
             users.forEach(function(user){
                 usernames.push(user.username);
-                console.log(usernames);
             });
 
             console.log(usernames);
 
-            io.emit("response usernames", usernames);
+            const data = {
+                usernames: usernames,
+                currUser: socket.request.user.username
+            }
+
+            io.emit("response usernames", data);
         });
 
     })

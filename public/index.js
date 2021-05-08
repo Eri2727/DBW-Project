@@ -23,23 +23,54 @@ function checkFile(input) {
     }
 }
 
-//Opens and closes the add new chat pop up
-function overlay() {
-    //addChat is the popup to create a new chat
-    el = $(".addChat");
-    elForm = $(".addChatForm");
-
-    //if is open then "closes"
-    if(el.css("display") != "none"){
-        el.css("display","none");
-        elForm.attr("disabled");
-    } else {
-        el.css("display","block");
-        elForm.attr("enabled");
-    }
-}
-
 const socket = io();
+
+const usernames = [];
+
+//when the popup is closed
+$('.closeNewChat').on('click', () => {
+    usernames.splice(0,usernames.length) //clears the array (usernames =[]) -> splice(index of where to start, number of items to delete)
+    $('#addedUsers .list-group').html(''); //clears the stuff inside the div
+    $('#newChatUsernameInput').val(''); //clears the username input
+
+});
+
+//when you add a user
+$('#addUserButton').on('click', () => {
+
+    const usernameInput = $('#newChatUsernameInput').val(); //gets the username to be added
+
+    socket.emit("request usernames");
+
+    // when the usernames are received
+    socket.once("response usernames",function(data){
+
+
+        const usernameList = data.usernames;
+
+        if(data.currUser === usernameInput){
+            alert("You can't add yourself");
+
+        } else if(usernameList.includes(usernameInput)){
+            $('#newChatUsernameInput').val(''); //clears the username input
+
+            usernames.push(usernameInput);
+
+            $('#addedUsers .list-group').append("<li class=\"list-group-item\">\n" +
+                "                            <input class=\"form-check-input me-1 text-end\" type=\"checkbox\" checked=\"true\">\n" +
+                "                            " + usernameInput + "\n" +
+                "                        </li>");
+
+        } else {
+            txt="User does not exist";
+
+        }
+    });
+
+
+});
+
+
 
 $("#searchUser").on("keyup" ,function (){ //when is typing trigger
 
@@ -47,7 +78,9 @@ $("#searchUser").on("keyup" ,function (){ //when is typing trigger
         socket.emit("request usernames");
 
     // when the usernames are received
-    socket.on("response usernames",function(usernameList){
+    socket.on("response usernames",function(data){
+
+        const usernameList = data.usernames;
 
         //puts every username as a recomendation
         $("#searchUser").attr("list", usernameList);

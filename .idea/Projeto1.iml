@@ -6,5 +6,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="@types/passport" level="application" />
     <orderEntry type="library" name="@types/jquery" level="application" />
+    <orderEntry type="library" name="@types/express" level="application" />
+    <orderEntry type="library" name="@types/mongoose" level="application" />
+    <orderEntry type="library" name="@types/socket.io" level="application" />
   </component>
 </module>
