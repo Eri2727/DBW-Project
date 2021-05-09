@@ -52,8 +52,6 @@ $('#addUserButton').on('click', () => {
     // when the usernames are received
     socket.once("response usernames",function(data){
 
-
-
         const usernameList = data.usernames;
 
         if(data.currUser === usernameInput){
@@ -68,10 +66,7 @@ $('#addUserButton').on('click', () => {
 
             usernames.push(usernameInput);
 
-            $('#addedUsers .list-group').append("<li class=\"list-group-item\">\n" +
-                "                            <input class=\"form-check-input me-1 text-end\" type=\"checkbox\" checked=\"true\">\n" +
-                "                            " + usernameInput + "\n" +
-                "                        </li>");
+            $('#addedUsers ul').append("<li>" + usernameInput + "<input type='button' onclick='removeUser()' class=\"removeUser\" value='&times;'></input></li>");
 
         } else {
             $('.search-error-message').html("<div class=\"alert alert-warning\" role=\"alert\">" +
@@ -107,8 +102,8 @@ $("#newChatUsernameInput").on("focus" ,function (event){ //when is typing trigge
         const usernameList = data.usernames;
 
         //removes self from list of recommendations
-        // const indexOfSelf = usernameList.indexOf(data.currUser);
-        // usernameList.splice(indexOfSelf, 1);
+        const indexOfSelf = usernameList.indexOf(data.currUser);
+        usernameList.splice(indexOfSelf, 1);
 
         let datalist = '';
         usernameList.forEach(element => {
@@ -122,7 +117,9 @@ $("#newChatUsernameInput").on("focus" ,function (event){ //when is typing trigge
 
 });
 
-//selector works
-$('input[type="checkbox"]').css('background-color', 'red');
+const removeUser = function() {
+    $('#addedUsers li').css('background-color','red')
+    console.log($('#addedUsers li').text());
+};
 
 

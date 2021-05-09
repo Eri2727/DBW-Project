@@ -169,3 +169,58 @@ body {
     padding-top: 2px;
     padding-bottom: 2px;
 }
+
+.removeUser {
+    background-color: #f6f6f6;
+    line-height: 0;
+    border-width: 0;
+    border-style: none;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    padding: 2.5% 2%;
+    transform: translate(0%, -50%);
+    z-index: inherit;
+}
+
+.removeUser:hover {
+    background: #bbb;
+}
+
+#addedUsers {
+    margin-top: 4%;
+    max-height: 60vh;
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+#addedUsers::-webkit-scrollbar {
+    display: none;
+}
+
+#addedUsers ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#addedUsers li {
+    border: 1px solid #ddd;
+    background-color: #f6f6f6;
+    padding: 1%;
+    text-decoration: none;
+    font-size: 1rem;
+    color: black;
+    display: block;
+    position: relative;
+}
+
+/*Selects all li after the 1st li (newChat users)*/
+#addedUsers li + li {
+    margin-top: -1px;
+}
+
+#addedUsers li:hover {
+    background-color: #eee;
+}
