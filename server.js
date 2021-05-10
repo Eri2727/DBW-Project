@@ -131,7 +131,13 @@ app.post("/register", upload.single('image'), function (req, res){
     });
 });
 
-app.post("/login",passport.authenticate("local", {failureRedirect: "/login", failureFlash: true}), (req,res) => {
+//middleware to turn the username into a capitalized username, meaning that the username is case insensitive
+function capitalizeUsername(req, res, next) {
+    req.body.username = req.body.username.charAt(0).toUpperCase() + req.body.username.slice(1).toLowerCase();
+    next();
+}
+
+app.post("/login", capitalizeUsername, passport.authenticate("local", {failureRedirect: "/login", failureFlash: true}), (req,res) => {
     res.redirect("/");
 });
 
