@@ -20,15 +20,13 @@ const upload = require('./model/multerConfigs')
 
 //AUTHENTICATION
 const passport = require('passport');
-const passportLocalMongoose = require('passport-local-mongoose');
 const session = require('express-session');
-const cookieParser = require('cookie-parser'); //Not sure if this one is being used or not
 //
 
 //OTHERS---------------------
 const url = require('url');
 const ejs = require('ejs');
-const flash = require('connect-flash');
+const flash = require('connect-flash'); //Used for the flash messages
 //---------------------------
 
 //FILES------------------------------------------
@@ -60,10 +58,9 @@ mongoConfigs.connect();
 
 //pull mongoose from mongo_configs
 const mongoose = mongoConfigs.mongoose;
-
 mongoose.set('useCreateIndex', true)
 
-//passport uses the standart strategy
+//passport uses the Strategy from PassportLocalMongoose that hashes the password
 passport.use(User.createStrategy());
 
 //serializes is User info into a "key"
