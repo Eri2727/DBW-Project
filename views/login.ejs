@@ -6,7 +6,12 @@
     <input type="text" id="inputUsername" name="username" class="form-control form-top" placeholder="Username" required autofocus>
     <label for="inputPassword" class="sr-only">Password</label>
     <input type="password" id="inputPassword" name="password" class="form-control form-bottom" placeholder="Password" required>
-    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+
+    <% if(error) {%>
+        <label for="subButton" class="registerError"><%= error %></label>
+    <% } %>
+
+    <button class="btn btn-lg btn-primary btn-block" id="subButton" type="submit">Sign in</button>
 
     <button class="btn btn-lg btn-primary btn-block" onclick="window.location='/register';">Sign Up</button>
 

@@ -25,8 +25,11 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser'); //Not sure if this one is being used or not
 //
 
+//OTHERS---------------------
 const url = require('url');
 const ejs = require('ejs');
+const flash = require('connect-flash');
+//---------------------------
 
 //FILES------------------------------------------
 const uniqueFilename = require('unique-filename')
@@ -46,6 +49,7 @@ const sessionMiddleware = session({
 })
 
 app.use(sessionMiddleware);
+app.use(flash());
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -72,7 +76,7 @@ app.get('/', (req, res) => {
     if(req.isAuthenticated()){
         res.render("index", {image: req.user.image});
     } else {
-        res.render("login");
+        res.render("login", {error : ""});
     }
 
 });
@@ -81,7 +85,7 @@ app.get("/login", function (req, res){
     if(req.isAuthenticated()){
         res.render("index");
     } else {
-        res.render("login");
+        res.render("login", {error: req.flash('error')});
     }
 });
 
@@ -111,7 +115,9 @@ app.post("/register", upload.single('image'), function (req, res){
         }
     }
 
-    User.register({username: req.body.username, image: image}, req.body.password, function(err, user){
+    const capitalizedUsername = req.body.username.charAt(0).toUpperCase() + req.body.username.slice(1).toLowerCase();
+
+    User.register({username: capitalizedUsername, image: image}, req.body.password, function(err, user){
 
         if(err){
             //Use this on the register page
@@ -125,11 +131,9 @@ app.post("/register", upload.single('image'), function (req, res){
     });
 });
 
-
-app.post("/login", passport.authenticate('local', {
-    successRedirect: "/",
-    failureRedirect: "/login"
-}));
+app.post("/login",passport.authenticate("local", {failureRedirect: "/login", failureFlash: true}), (req,res) => {
+    res.redirect("/");
+});
 
 const io = require('socket.io')(server);
 
@@ -159,8 +163,6 @@ io.on('connection',function(socket){
             users.forEach(function(user){
                 usernames.push(user.username);
             });
-
-            console.log(usernames);
 
             const data = {
                 usernames: usernames,

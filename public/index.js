@@ -1,3 +1,4 @@
+
 //Verifies the image that the user inputs as their profile picture
 function checkFile(input) {
     var file = input.files[0];
@@ -54,19 +55,21 @@ $('#addUserButton').on('click', () => {
 
         const usernameList = data.usernames;
 
-        if(data.currUser === usernameInput){
+        const capitalizedName = usernameInput.charAt(0).toUpperCase() + usernameInput.slice(1).toLowerCase();
+
+        if(data.currUser === capitalizedName){
 
             $('.search-error-message').html('<div class="alert alert-danger" role="alert">' +
                 '  You can\'t add yourself' +
                 '</div>');
 
 
-        } else if(usernameList.includes(usernameInput)){
+        } else if(usernameList.includes(capitalizedName)){
             $('#newChatUsernameInput').val(''); //clears the username input
 
             usernames.push(usernameInput);
 
-            $('#addedUsers ul').append("<li>" + usernameInput + "<input type='button' onclick='removeUser()' class=\"removeUser\" value='&times;'></input></li>");
+            $('#addedUsers ul').append("<li>" + capitalizedName + "<input type='button' class=\"removeUser\" value='&times;'></input></li>");
 
         } else {
             $('.search-error-message').html("<div class=\"alert alert-warning\" role=\"alert\">" +
@@ -117,9 +120,9 @@ $("#newChatUsernameInput").on("focus" ,function (event){ //when is typing trigge
 
 });
 
-const removeUser = function() {
-    $('#addedUsers li').css('background-color','red')
-    console.log($('#addedUsers li').text());
-};
+//Waits for a click on every element with the class removeUser (buttons) inside the element with the id newChat (a div)
+$('#newChat').on('click', '.removeUser', function() {
+    $(this).parent().remove();
+});
 
 
