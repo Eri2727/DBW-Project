@@ -31,7 +31,7 @@ const usernames = [];
 //when the popup is closed
 $('.closeNewChat').on('click', () => {
     usernames.splice(0,usernames.length) //clears the array (usernames =[]) -> splice(index of where to start, number of items to delete)
-    $('#addedUsers .list-group').html(''); //clears the stuff inside the div
+    $('#addedUsers ul').html(''); //clears the stuff inside the div
     $('#newChatUsernameInput').val(''); //clears the username input
     $('.search-error-message').html(''); //removes error message
 });
@@ -64,10 +64,15 @@ $('#addUserButton').on('click', () => {
                 '</div>');
 
 
+        } else if (usernames.includes(capitalizedName)){
+            $('.search-error-message').html('<div class="alert alert-danger" role="alert">' +
+                '  Username already added' +
+                '</div>');
+
         } else if(usernameList.includes(capitalizedName)){
             $('#newChatUsernameInput').val(''); //clears the username input
 
-            usernames.push(usernameInput);
+            usernames.push(capitalizedName);
 
             $('#addedUsers ul').append("<li>" + capitalizedName + "<input type='button' class=\"removeUser\" value='&times;'></input></li>");
 
@@ -122,6 +127,9 @@ $("#newChatUsernameInput").on("focus" ,function (event){ //when is typing trigge
 
 //Waits for a click on every element with the class removeUser (buttons) inside the element with the id newChat (a div)
 $('#newChat').on('click', '.removeUser', function() {
+    const usernameToBeRemoved = $(this).parent().text();
+    const usernameIndex = usernames.indexOf(usernameToBeRemoved);
+    usernames.splice(usernameIndex, 1);
     $(this).parent().remove();
 });
 

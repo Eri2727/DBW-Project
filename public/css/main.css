@@ -225,3 +225,7 @@ body {
 #addedUsers li:hover {
     background-color: #eee;
 }
+
+.search-error-message .alert {
+
+}

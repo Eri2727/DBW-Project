@@ -4,7 +4,7 @@ const messageSchema = new mongoose.Schema({
     sender: String, //username of the sender
     body: String, //the message
     date: Date, //date of creation
-    messages: [this]
+    forwardedMessage: this //com o id da mensagem
 });
 
 const chatSchema = new mongoose.Schema({ //group of messages and people

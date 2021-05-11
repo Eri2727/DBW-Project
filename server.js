@@ -121,7 +121,7 @@ app.post("/register", upload.single('image'), function (req, res){
             const msg = "Username already in use";
             res.render("register", {error: msg});
         } else {
-            passport.authenticate("local")(req,res, function(){
+            passport.authenticate("local", {failureRedirect: "/register", failureFlash: true})(req, res, function() {
                 res.redirect("/");
             });
         }
