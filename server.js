@@ -95,11 +95,17 @@ app.get("/register", function (req, res){
 });
 
 app.get('/logout', function(req, res){
+
+    const socketId = req.session.socketId;
+    if(socketId && io.of("/").sockets.get(socketId)) {
+        io.of("/").sockets.get(socketId).disconnect(true);
+    }
+
     req.logout();
     res.redirect('/');
 });
 
-app.post("/register", upload.single('image'), function (req, res){
+app.post("/register", upload.single('image'), capitalizeUsername, function (req, res){
 
     const imageName = uniqueFilename("./uploads")
 
@@ -111,10 +117,8 @@ app.post("/register", upload.single('image'), function (req, res){
             contentType: 'image/png'
         }
     }
-
-    const capitalizedUsername = req.body.username.charAt(0).toUpperCase() + req.body.username.slice(1).toLowerCase();
-
-    User.register({username: capitalizedUsername, image: image}, req.body.password, function(err, user){
+    
+    User.register({username: req.body.username, image: image}, req.body.password, function(err, user){
 
         if(err){
             //Use this on the register page
@@ -155,9 +159,10 @@ io.use((socket, next) => {
     }
 });
 
-io.on('connection',function(socket){
-    console.log("connection on");
+io.on('connect',function(socket){
+    console.log(`new connection ${socket.id}`);
 
+    //Joins all the usernames in the db into one array and sends it to the autocomplete list in the create chat pop up
     socket.on('request usernames',function(){
         const usernames = [];
 
@@ -175,7 +180,11 @@ io.on('connection',function(socket){
             io.emit("response usernames", data);
         });
 
-    })
+    });
+
+
+
+
 });
 
 server.listen(process.env.PORT || 3000,function(){

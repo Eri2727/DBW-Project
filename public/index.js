@@ -100,6 +100,7 @@ $("#newChatUsernameInput").on('keydown', function(event){
    }
 });
 
+//when the username input box becomes focused asks and receives the usernames to autocomplete
 $("#newChatUsernameInput").on("focus" ,function (event){ //when is typing trigger
 
     socket.emit("request usernames");
@@ -131,6 +132,13 @@ $('#newChat').on('click', '.removeUser', function() {
     const usernameIndex = usernames.indexOf(usernameToBeRemoved);
     usernames.splice(usernameIndex, 1);
     $(this).parent().remove();
+});
+
+//Button to create a new chat emits a request to create a new chat adding the usernames
+$('#createNewChat').on('click', () => {
+
+    console.log(usernames);
+
 });
 
 

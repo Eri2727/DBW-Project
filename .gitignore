@@ -115,5 +115,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# uploads
-uploads/
+# all files inside uploads, instead of the folder, since it would create an error when creating a file into that folder
+uploads/**
