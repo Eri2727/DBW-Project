@@ -224,6 +224,21 @@ io.on('connect',function(socket,req, res){
 
     });
 
+    socket.on("getChat", (chatId) => {
+        console.log(chatId);
+
+        Chat.findById(chatId, (err, chat) => {
+
+            if(err){
+                console.log(err);
+            } else {
+                io.to(socket.request.user.username).emit("getChat", socket.request.user.username,chat);
+            }
+
+        });
+
+    });
+
 });
 
 server.listen(process.env.PORT || 3000,function(){

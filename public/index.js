@@ -152,7 +152,7 @@ socket.on('appendChat', (chat) => {
 
     const chatList = $("#chatList");
 
-    chatList.prepend("<li class=\"nav-item chatItem\">\n" +
+    chatList.prepend("<li id=\"" + chat.id + "\" class=\"nav-item chatItem\">\n" +
         "    <h6 class=\"chatTitle\">" + chat.name + "</h6>\n" +
         "</li>");
 
@@ -160,8 +160,39 @@ socket.on('appendChat', (chat) => {
 
 });
 
+//asks for the chat that was clicked
 $('#chatList').on('click', '.chatItem', function() {
 
+    socket.emit("getChat", $(this).attr('id'));
 
+});
+
+//receives the chat that was requested
+socket.on("getChat", (me, chat) => {
+
+    console.log(chat);
+
+    $("#chatTitle").text(chat.name);
+
+    //Clears the messages before appending
+    $("#messages").html('');
+
+    chat.messages.forEach(message => {
+        if(message.sender === me){
+            const sentClass = " sent";
+        } else {
+            const sentClass = "";
+        }
+
+        $("#messages").append("<div class=\"message\"" + sentClass + ">\n" +
+            "            <img  src=\"data:image/<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>\" alt=\"Avatar\"style=\"width:100%;\">\n" +
+            "            <p>Hello. How are you today?</p>\n" +
+            "            <span class=\"name-left\">Yuna</span>\n" +
+            "            <span class=\"time-right\">11:00</span>\n" +
+            "        </div>");
+
+    });
+
+    //check if me and start printing messages
 
 });

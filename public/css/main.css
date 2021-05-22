@@ -306,3 +306,11 @@ body {
     float: left;
     color: #aaa;
 }
+
+#messages{
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    height: 75vh;
+}
+
