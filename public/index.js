@@ -137,8 +137,31 @@ $('#newChat').on('click', '.removeUser', function() {
 //Button to create a new chat emits a request to create a new chat adding the usernames
 $('#createNewChat').on('click', () => {
 
-    console.log(usernames);
+    if(usernames.length === 0){
+        $('.search-error-message').html('<div class="alert alert-danger" role="alert">' +
+            'You cannot create a chat with yourself.' + '</div>');
+    } else {
+
+        socket.emit("newChat", usernames);
+
+    }
 
 });
 
+socket.on('appendChat', (chat) => {
 
+    const chatList = $("#chatList");
+
+    chatList.prepend("<li class=\"nav-item chatItem\">\n" +
+        "    <h6 class=\"chatTitle\">" + chat.name + "</h6>\n" +
+        "</li>");
+
+    $('.closeNewChat').trigger('click');
+
+});
+
+$('#chatList').on('click', '.chatItem', function() {
+
+
+
+});

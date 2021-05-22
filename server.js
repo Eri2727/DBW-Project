@@ -15,7 +15,8 @@ const server =http.createServer(app);
 //MODELS----------------------------------------------
 const mongoConfigs = require('./model/mongoConfigs');
 const User = require('./model/user');
-const upload = require('./model/multerConfigs')
+const upload = require('./model/multerConfigs');
+const Chat = require('./model/chat');
 //----------------------------------------------------
 
 //AUTHENTICATION
@@ -71,7 +72,17 @@ passport.deserializeUser(User.deserializeUser());
 
 app.get('/', (req, res) => {
     if(req.isAuthenticated()){
-        res.render("index", {image: req.user.image});
+
+        //finds all chats that the users array include the req.user.username
+        Chat.find({ users : req.user.username }, (err, docs) => {
+            if(err) {
+                console.log(err);
+                res.render("index", {user: req.user, chats: []});
+            } else {
+                res.render("index", {user: req.user, chats: docs});
+            }
+        });
+
     } else {
         res.render("login", {error : ""});
     }
@@ -117,7 +128,7 @@ app.post("/register", upload.single('image'), capitalizeUsername, function (req,
             contentType: 'image/png'
         }
     }
-    
+
     User.register({username: req.body.username, image: image}, req.body.password, function(err, user){
 
         if(err){
@@ -159,8 +170,17 @@ io.use((socket, next) => {
     }
 });
 
-io.on('connect',function(socket){
-    console.log(`new connection ${socket.id}`);
+io.on('connect',function(socket,req, res){
+
+    //This socket joins a room with the username
+    //Basically each user is going to have a room
+    socket.join(socket.request.user.username);
+
+    //Saves the socketid in the session sid
+    const session = socket.request.session;
+    console.log(`saving sid ${socket.id} in session ${session.id}`);
+    session.socketId = socket.id;
+    session.save();
 
     //Joins all the usernames in the db into one array and sends it to the autocomplete list in the create chat pop up
     socket.on('request usernames',function(){
@@ -182,8 +202,27 @@ io.on('connect',function(socket){
 
     });
 
+    socket.on('newChat', (usernames) => {
 
+        //The array doesn't have the username of the user that creates the chat
+        usernames.push(socket.request.user.username);
 
+        const date = new Date(); // "day/month/year hour:min:seconds"
+
+        const newChat = new Chat({
+            name: date.toLocaleString("pt"), //the date is the name in the beggining
+            date: date, //date in which group was created
+            users: usernames, //usernames of people belonging to the group
+            messages: []
+        });
+
+        newChat.save();
+
+        usernames.forEach(username => {
+            io.to(username).emit('appendChat', newChat);
+        });
+
+    });
 
 });
 

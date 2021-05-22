@@ -1,14 +1,8 @@
+<% chats.forEach(chat => { %>
 <li class="nav-item chatItem">
-    <div class="d-flex bd-highlight">
-        <div class="p-2 w-100 bd-highlight">
-            <h6 class="chatTitle">ChatTitle</h6>
-            <p class="lastMessage">Last message bluhbluhbluhbluhbluhdnasfuhdfuuhfduaf</p>
-        </div>
-        <div class="p-2 flex-shrink-1 bd-highlight">
-            <p class="timeLastMessage">17:38</p>
-        </div>
-    </div>
+    <h6 class="chatTitle"><%= chat.name %></h6>
 </li>
+<% });%>
 
 <!--for loop calling the template-->
 
