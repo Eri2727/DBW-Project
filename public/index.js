@@ -10,6 +10,11 @@ function checkFile(input) {
         $("#inputImage").val(null);
         location.reload();
     }
+    if(input.files[0].size >= 16777216){
+        alert("Image is too big. Max 16mb.");
+        $("#inputImage").val(null);
+        location.reload();
+    }
 
     if (input.files && input.files[0] ) {
         var reader = new FileReader();
@@ -180,58 +185,46 @@ $('#chatList').on('click', '.chatItem', function() {
 
 });
 
+let userImages = [];
+let myUsername;
+
 //receives the chat that was requested
 socket.on("getChat", (me, chat, userImage) => {
 
-    $("#chatTitle").text(chat.name);
+    //If the user changes the id with developer tools
+    if(chat === null && userImage === null){
+        $("#chatTitle").text("UNAUTHORIZED - Don't be a smart ass...");
+        window.sessionStorage.clear();
+        $('#messages').html(null);
+        $('#messageInput').html(null);
+    } else {
 
-    //Clears the messages before appending
-    $("#messages").html('');
+        myUsername = me;
 
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        userImages = userImage;
 
-    chat.messages.forEach(message => {
+        $("#chatTitle").text(chat.name);
 
-        let sentClass = "";
+        //Clears the messages before appending
+        $("#messages").html('');
 
-        if(message.sender === me){
-            sentClass = " sent";
-        }
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-        let timeStamp = "";
-        let messageDate = new Date(message.date);
+        chat.messages.forEach(message => {
 
-        if((new Date().getFullYear() - messageDate.getFullYear()) > 0){ //if more than a year has passed
-            timeStamp = messageDate.getDate() + "/" + messageDate.getMonth() + 1 + "/" + messageDate.getFullYear();
-            //timeStamp = day/month/year
+            appendMessage(message);
 
-        } else if((new Date().getMonth() - messageDate.getMonth()) > 0){ // If a month has passed
-            timeStamp = messageDate.getDate() + " " + months[messageDate.getMonth()];
-            //timeStamp = day month
-        } else if((new Date().getDate() - messageDate.getDate()) > 0) { // if a day has passed
-            timeStamp = (new Date().getDate() - messageDate.getDate()) + " days ago";
-            //timeStamp = x days ago
-        } else {
-            timeStamp = messageDate.getHours() + ":" + messageDate.getMinutes();
-            //timeStamp = hours:minutes;
-        }
+        });
 
-        let image = userImage[message.sender].data;
+        $('#messageInput').html("<textarea rows=\"2\" class=\"form-control\" autocomplete=\"off\" id=\"message\" placeholder=\"Type your message here\" ></textarea>\n" +
+            "        <button class=\"btn btn-outline-secondary\" type=\"button\" id=\"sendMessage\"><i class=\"far fa-paper-plane\"></i></button>");
 
-        $("#messages").append("<div class=\"message\"" + sentClass + ">\n" +
-            "            <img  src=\"data:/" + userImage[message.sender].contentType + ";base64," +
-            image + "\" alt=\"Avatar\"style=\"width:100%;\">\n" +
-            "            <p>" + message.body + "</p>\n" +
-            "            <span class=\"name-left\">" + message.sender + "</span>\n" +
-            "            <span class=\"time-right\">" + timeStamp + "</span>\n" +
-            "        </div>");
-
-    });
+    }
 
 });
 
 //if the message input is focused and ENTER is clicked, checks if the input is empty, if not triggers a click on the send button
-$('#message').on('keydown', (event) => {
+$('#messageInput').on('keydown', '#message', (event) => {
 
     if(event.key == 'Enter') {
         event.preventDefault(); //prevents ENTER from creating a new line
@@ -239,7 +232,7 @@ $('#message').on('keydown', (event) => {
     }
 });
 
-$("#sendMessage").on("click", () => {
+$("#messageInput").on("click", '#sendMessage', () => {
 
     //chat id
     let currentChat = window.sessionStorage.getItem("currentChat");
@@ -252,6 +245,54 @@ $("#sendMessage").on("click", () => {
         socket.emit("newMessage", currentChat, messageBody);
     }
 
+});
+
+socket.on('newMessage', (message, chatId) => {
+
+    if(window.sessionStorage.getItem("currentChat") === chatId){
+        appendMessage(message);
+    }
 
 });
 
+function appendMessage(message){
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    let sentClass = "";
+
+    if (message.sender === myUsername) {
+        sentClass = " sent";
+    }
+
+    let timeStamp = "";
+    let messageDate = new Date(message.date);
+
+    if ((new Date().getFullYear() - messageDate.getFullYear()) > 0) { //if more than a year has passed
+        timeStamp = messageDate.getDate() + "/" + messageDate.getMonth() + 1 + "/" + messageDate.getFullYear();
+        //timeStamp = day/month/year
+
+    } else if ((new Date().getMonth() - messageDate.getMonth()) > 0) { // If a month has passed
+        timeStamp = messageDate.getDate() + " " + months[messageDate.getMonth()];
+        //timeStamp = day month
+    } else if ((new Date().getDate() - messageDate.getDate()) > 0) { // if a day has passed
+        timeStamp = (new Date().getDate() - messageDate.getDate()) + " days ago";
+        //timeStamp = x days ago
+    } else {
+        // timeStamp = messageDate.getHours() + ":" + messageDate.getMinutes();
+        timeStamp = messageDate.toLocaleTimeString(navigator.language, {
+            hour: '2-digit',
+            minute: '2-digit'
+        })
+        //timeStamp = hours:minutes;
+    }
+
+    let image = userImages[message.sender].data;
+
+    $("#messages").append("<div class=\"message\"" + sentClass + ">\n" +
+        "            <img  src=\"data:/" + userImages[message.sender].contentType + ";base64," +
+        image + "\" alt=\"Avatar\">\n" +
+        "            <p>" + message.body + "</p>\n" +
+        "            <span class=\"name-left\">" + message.sender + "</span>\n" +
+        "            <span class=\"time-right\">" + timeStamp + "</span>\n" +
+        "        </div>");
+}

@@ -100,12 +100,22 @@ body {
     background-color: inherit;
 }
 
+#chatList {
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    max-height: 88vh;
+}
+
 .chatItem {
     border: 1px solid #DAE0E2;
     cursor: pointer;
     opacity: 0.8;
     transition: 0.3s;
     padding: 3% 2%;
+    width: 100%;
+    max-height: 10%;
+    display: block;
 }
 
 .chatItem + .chatItem {
@@ -297,10 +307,11 @@ body {
 /* Style images */
 .message img {
     float: left;
-    max-width: 60px;
-    width: 100%;
+    width: 60px;
+    height: 60px;
     margin-right: 20px;
     border-radius: 50%;
+    object-fit: cover;
 }
 
 /* Style the right image */

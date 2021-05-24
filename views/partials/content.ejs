@@ -12,67 +12,10 @@
 
     <div id="messages">
 
-        <div class="message">
-            <img  src="data:image/<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="Avatar"style="width:100%;">
-            <p>Hello. How are you today?</p>
-            <span class="name-left">Yuna</span>
-            <span class="time-right">11:00</span>
-        </div>
-
-        <div class="message sent">
-            <img  src="data:image/<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="Avatar" class="right" style="width:100%;">
-            <p>Hey! I'm fine. Thanks for asking!</p>
-            <span class="name-right">Eri</span>
-            <span class="time-left">11:01</span>
-        </div>
-
-        <div class="message">
-            <img  src="data:image/<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="Avatar"style="width:100%;">
-            <p>Hello. How are you today?</p>
-            <span class="name-left">Yuna</span>
-            <span class="time-right">11:00</span>
-        </div>
-
-        <div class="message sent">
-            <img  src="data:image/<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="Avatar" class="right" style="width:100%;">
-            <p>Hey! I'm fine. Thanks for asking!</p>
-            <span class="name-right">Eri</span>
-            <span class="time-left">11:01</span>
-        </div>
-
-        <div class="message">
-            <img  src="data:image/<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="Avatar"style="width:100%;">
-            <p>Hello. How are you today?</p>
-            <span class="name-left">Yuna</span>
-            <span class="time-right">11:00</span>
-        </div>
-
-        <div class="message sent">
-            <img  src="data:image/<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="Avatar" class="right" style="width:100%;">
-            <p>Hey! I'm fine. Thanks for asking!</p>
-            <span class="name-right">Eri</span>
-            <span class="time-left">11:01</span>
-        </div>
-
-        <div class="message">
-            <img  src="data:image/<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="Avatar"style="width:100%;">
-            <p>Hello. How are you today?</p>
-            <span class="name-left">Yuna</span>
-            <span class="time-right">11:00</span>
-        </div>
-
-        <div class="message sent">
-            <img  src="data:image/<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="Avatar" class="right" style="width:100%;">
-            <p>Hey! I'm fine. Thanks for asking!</p>
-            <span class="name-right">Eri</span>
-            <span class="time-left">11:01</span>
-        </div>
-
     </div>
 
-    <div class="input-group mb-3">
-        <textarea rows="2" class="form-control" autocomplete="off" id="message" placeholder="Type your message here" ></textarea>
-        <button class="btn btn-outline-secondary" type="button" id="sendMessage"><i class="far fa-paper-plane"></i></button>
+    <div class="input-group mb-3" id="messageInput">
+
     </div>
 
 </div>

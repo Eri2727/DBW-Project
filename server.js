@@ -230,17 +230,27 @@ io.on('connect',function(socket,req, res){
     socket.on("getChat", (chatId) => {
 
         UserController.getUserImages(chatId, (users, chat, err) => {
+
+            let userList = [];
+            users.forEach(user => {
+                userList.push(user.username);
+            })
+
             if(err) {
                 console.log(err);
-            } else {
+            } else if (!userList.includes(socket.request.user.username)){
+                let me = socket.request.user.username;
+
+                io.to(me).emit('getChat', me, null, null);
+            }
+            else {
                 let userImage = {};
 
                 users.forEach(user => {
-                    let auxImage = {
+                    userImage[user.username] = {
                         data: user.image.img.data.toString('base64'),
                         contentType: user.image.contentType
-                    }
-                    userImage[user.username] = auxImage;
+                    };
                 });
 
                 let me = socket.request.user.username;
@@ -250,8 +260,6 @@ io.on('connect',function(socket,req, res){
             }
         });
 
-
-
     });
 
     socket.on("newMessage", (chatId, messageBody) => {
@@ -259,23 +267,32 @@ io.on('connect',function(socket,req, res){
         Chat.findById(chatId, (err, chat) => {
             if(err) {
                 console.log(err);
+            } else if(!chat.users.includes(socket.request.user.username)){
+                let me = socket.request.user.username;
+
+                //If the user that is trying to send a msg doesnt belong to the chat, its gonna show "Dont be a smart ass
+                io.to(me).emit('getChat', me, null, null);
             } else {
                 const me = socket.request.user.username;
 
                 const message = new messageSchema({
                     sender: me,
                     body: messageBody,
-                    date: new Date()
+                    date: new Date(),
                 });
 
                 chat.messages.push(message);
 
+                //save the message in the database
                 chat.save();
+
+                //send the message to everyone
+                chat.users.forEach(username => {
+                    io.to(username).emit('newMessage', message, chatId, me);
+                })
             }
         });
-
     });
-
 });
 
 server.listen(process.env.PORT || 3000,function(){

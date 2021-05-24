@@ -1,14 +1,18 @@
 <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
     <div class="position-sticky d-flex flex-column justify-content-between">
         <div class="flex-grow-1">
-            <ul id="chatList" class="nav flex-column flex-grow-1">
+            <ul id="chatList" class="nav">
                 <%- include ('chatList')%>
             </ul>
         </div>
         <div class="flex-shrink-0 newConversation">
 
                 <div class="p-2 bd-highlight flex-shrink-1">
-                    <span title="Create new chat"><button id="#newChatButton" data-bs-toggle="modal" data-bs-target="#newChat"><h3><i class="bi bi-plus-square"></i></h3></button></span>
+                    <span title="Create new chat">
+                        <button id="#newChatButton" data-bs-toggle="modal" data-bs-target="#newChat">
+                            <h3><i class="bi bi-plus-square"></i></h3>
+                        </button>
+                    </span>
                 </div>
 
         </div>
