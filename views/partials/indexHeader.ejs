@@ -11,7 +11,7 @@
             <div class="dropdown">
                 <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     <%= user.username %>
-                    <img class="userIcon" src="data:image/<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="dropdown image" class="img-responsive">
+                    <img class="userIcon" src="data:<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="dropdown image" class="img-responsive">
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end position-absolute">

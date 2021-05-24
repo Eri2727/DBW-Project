@@ -4,7 +4,7 @@ const messageSchema = new mongoose.Schema({
     sender: String, //username of the sender
     body: String, //the message
     date: Date, //date of creation
-    forwardedMessage: this //com o id da mensagem
+    forwardedMessage: this //ou com o id da mensagem
 });
 
 const chatSchema = new mongoose.Schema({ //group of messages and people
@@ -14,6 +14,10 @@ const chatSchema = new mongoose.Schema({ //group of messages and people
     messages: [messageSchema]
 });
 
-const chat = new mongoose.model("chat", chatSchema);
+const Chat = new mongoose.model("chat", chatSchema);
+const Message = new mongoose.model("message", messageSchema)
 
-module.exports = chat;
+module.exports = {
+    Chat,
+    Message
+};

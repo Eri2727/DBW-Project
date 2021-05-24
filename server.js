@@ -1,5 +1,3 @@
-//modules
-
 //EXPRESS--------------------------
 const express = require('express');
 const app = express();
@@ -9,14 +7,19 @@ const bodyParser = require('body-parser');
 
 //SERVER------------------------------------------------------------
 const http = require('http');
-const server =http.createServer(app);
+const server = http.createServer(app);
 //------------------------------------------------------------------
 
+//CONTROLLERS-----------------------------------------
+const UserController = require('./controller/UserController');
+//----------------------------------------------------
+
 //MODELS----------------------------------------------
-const mongoConfigs = require('./model/mongoConfigs');
+const mongoConfigs = require('./model/mongooseConfigs');
 const User = require('./model/user');
 const upload = require('./model/multerConfigs');
-const Chat = require('./model/chat');
+const Chat = require('./model/chat').Chat;
+const messageSchema = require('./model/chat').Message;
 //----------------------------------------------------
 
 //AUTHENTICATION
@@ -84,14 +87,14 @@ app.get('/', (req, res) => {
         });
 
     } else {
-        res.render("login", {error : ""});
+        res.redirect("/login");
     }
 
 });
 
 app.get("/login", function (req, res){
     if(req.isAuthenticated()){
-        res.render("index");
+        res.redirect("/");
     } else {
         res.render("login", {error: req.flash('error')});
     }
@@ -226,24 +229,49 @@ io.on('connect',function(socket,req, res){
 
     socket.on("getChat", (chatId) => {
 
-        Chat.findById(chatId, (err, chat) => {
-
-            if(err){
+        UserController.getUserImages(chatId, (users, chat, err) => {
+            if(err) {
                 console.log(err);
             } else {
+                let userImage = {};
 
-                //Create a dictionary (key = username, value = image)
-                let userImage = new Object();
-
-                chat.users.forEach(user => {
-                    //Create each key-value pair
-                    userImage[user.username] = user.image;
-
+                users.forEach(user => {
+                    let auxImage = {
+                        data: user.image.img.data.toString('base64'),
+                        contentType: user.image.contentType
+                    }
+                    userImage[user.username] = auxImage;
                 });
 
-                io.to(socket.request.user.username).emit("getChat", socket.request.user.username, chat, userImage);
-            }
+                let me = socket.request.user.username;
 
+                io.to(me).emit('getChat', me, chat, userImage);
+
+            }
+        });
+
+
+
+    });
+
+    socket.on("newMessage", (chatId, messageBody) => {
+
+        Chat.findById(chatId, (err, chat) => {
+            if(err) {
+                console.log(err);
+            } else {
+                const me = socket.request.user.username;
+
+                const message = new messageSchema({
+                    sender: me,
+                    body: messageBody,
+                    date: new Date()
+                });
+
+                chat.messages.push(message);
+
+                chat.save();
+            }
         });
 
     });

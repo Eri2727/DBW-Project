@@ -199,25 +199,28 @@ socket.on("getChat", (me, chat, userImage) => {
         }
 
         let timeStamp = "";
+        let messageDate = new Date(message.date);
 
-        if((new Date().getFullYear() - message.date.getFullYear()) > 0){ //if more than a year has passed
-            timeStamp = message.date.getDate() + "/" + message.date.getMonth() + 1 + "/" + message.date.getFullYear();
+        if((new Date().getFullYear() - messageDate.getFullYear()) > 0){ //if more than a year has passed
+            timeStamp = messageDate.getDate() + "/" + messageDate.getMonth() + 1 + "/" + messageDate.getFullYear();
             //timeStamp = day/month/year
 
-        } else if((new Date().getMonth() - message.date.getMonth()) > 0){ // If a month has passed
-            timeStamp = message.date.getDate() + " " + months[message.date.getMonth()];
+        } else if((new Date().getMonth() - messageDate.getMonth()) > 0){ // If a month has passed
+            timeStamp = messageDate.getDate() + " " + months[messageDate.getMonth()];
             //timeStamp = day month
-        } else if((new Date().getDate() - message.date.getDate()) > 0) { // if a day has passed
-            timeStamp = (new Date().getDate() - message.date.getDate()) + " days ago";
+        } else if((new Date().getDate() - messageDate.getDate()) > 0) { // if a day has passed
+            timeStamp = (new Date().getDate() - messageDate.getDate()) + " days ago";
             //timeStamp = x days ago
         } else {
-            timeStamp = message.date.getHours() + ":" + message.date.getMinutes();
+            timeStamp = messageDate.getHours() + ":" + messageDate.getMinutes();
             //timeStamp = hours:minutes;
         }
 
+        let image = userImage[message.sender].data;
+
         $("#messages").append("<div class=\"message\"" + sentClass + ">\n" +
-            "            <img  src=\"data:image/" + userImage[message.sender].img.contentType + ";base64," +
-            userImage[message.sender].img.data.toString('base64') + "\" alt=\"Avatar\"style=\"width:100%;\">\n" +
+            "            <img  src=\"data:/" + userImage[message.sender].contentType + ";base64," +
+            image + "\" alt=\"Avatar\"style=\"width:100%;\">\n" +
             "            <p>" + message.body + "</p>\n" +
             "            <span class=\"name-left\">" + message.sender + "</span>\n" +
             "            <span class=\"time-right\">" + timeStamp + "</span>\n" +
@@ -228,7 +231,27 @@ socket.on("getChat", (me, chat, userImage) => {
 });
 
 //if the message input is focused and ENTER is clicked, checks if the input is empty, if not triggers a click on the send button
-$('#message').on('keydown', () => {
+$('#message').on('keydown', (event) => {
+
+    if(event.key == 'Enter') {
+        event.preventDefault(); //prevents ENTER from creating a new line
+        $('#sendMessage').trigger('click');
+    }
+});
+
+$("#sendMessage").on("click", () => {
+
+    //chat id
+    let currentChat = window.sessionStorage.getItem("currentChat");
+
+    let messageBody = $("#message").val();
+    $("#message").val("");
+
+    //if the message has at least one non blank character
+    if(messageBody.trim().length > 0){
+        socket.emit("newMessage", currentChat, messageBody);
+    }
 
 
 });
+
