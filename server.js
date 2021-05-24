@@ -210,7 +210,7 @@ io.on('connect',function(socket,req, res){
         const date = new Date(); // "day/month/year hour:min:seconds"
 
         const newChat = new Chat({
-            name: date.toLocaleString("pt"), //the date is the name in the beggining
+            name: date.toLocaleString("pt"), //the date is the name in the beginning
             date: date, //date in which group was created
             users: usernames, //usernames of people belonging to the group
             messages: []
@@ -225,14 +225,23 @@ io.on('connect',function(socket,req, res){
     });
 
     socket.on("getChat", (chatId) => {
-        console.log(chatId);
 
         Chat.findById(chatId, (err, chat) => {
 
             if(err){
                 console.log(err);
             } else {
-                io.to(socket.request.user.username).emit("getChat", socket.request.user.username,chat);
+
+                //Create a dictionary (key = username, value = image)
+                let userImage = new Object();
+
+                chat.users.forEach(user => {
+                    //Create each key-value pair
+                    userImage[user.username] = user.image;
+
+                });
+
+                io.to(socket.request.user.username).emit("getChat", socket.request.user.username, chat, userImage);
             }
 
         });

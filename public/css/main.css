@@ -2,6 +2,32 @@ body {
     font-size: .875rem;
 }
 
+/*-----ScrollBar-------*/
+
+/* width */
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius:10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius:10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: darkslateblue;
+}
+
+/*-----------------*/
+
 .feather {
     width: 16px;
     height: 16px;
@@ -308,9 +334,13 @@ body {
 }
 
 #messages{
-    overflow-y: scroll;
+    overflow-y: auto;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    height: 75vh;
+    height: 73vh;
+}
+
+textarea {
+    resize: none;
 }
 
