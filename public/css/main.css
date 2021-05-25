@@ -190,9 +190,11 @@ body {
 }
 
 .userIcon {
-    max-width: 50px;
-    max-height: 40px;
+    width: 45px;
+    height: 45px;
     border-radius: 100%;
+    object-fit:cover;
+
 }
 
 .nav-item .dropdown-toggle {
@@ -283,18 +285,14 @@ body {
     background-color: #E1EFF2;
     border-radius: 5px;
     padding: 10px;
-    margin: 10px 0;
-    animation: backInLeft;
-    animation-duration: .15s;
+    margin: 10px;
+    position: relative;
 }
 
 /* Darker chat container */
 .sent {
     border-color: #f6a1b9;
     background-color: #f7b2c6;
-    animation: backInRight;
-    animation-duration: .15s;
-
 }
 
 /* Clear floats */
@@ -348,10 +346,51 @@ body {
     overflow-y: auto;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    height: 73vh;
+    height: 67vh;
 }
 
 textarea {
     resize: none;
 }
 
+.reply-btn {
+    position: absolute;
+    top: -5px;
+    right: 40px;
+    padding-right: 0;
+}
+
+.share-btn {
+    position: absolute;
+    top: -5px;
+    right: 5px;
+    padding-left: 0;
+}
+
+#replied-message {
+    padding: 0;
+    position: relative;
+}
+
+#replied-message .message {
+    margin: 0;
+}
+
+#messageInput {
+    margin-top: 5px;
+}
+
+/*Selects all the elements that are div and have the class form-control and the messageInput is the parent*/
+#messageInput > div.form-control {
+    padding: 0;
+}
+
+#message{
+    border: none;
+}
+
+#replied-message .removeReply {
+    position: absolute;
+    top: -4px;
+    right: 5px;
+}

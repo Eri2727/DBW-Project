@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const messageSchema = new mongoose.Schema({
     sender: String, //username of the sender
@@ -10,8 +11,14 @@ const messageSchema = new mongoose.Schema({
 const chatSchema = new mongoose.Schema({ //group of messages and people
     name: String, //name of the group
     date: Date, //date in which group was created
-    users: [String], //usernames of people belonging to the group
+    usernames: [String], //usernames of people belonging to the chat
     messages: [messageSchema]
+});
+
+chatSchema.virtual('users', {
+    ref: 'User', //the model to get the user
+    localField: ['usernames'], //users will be the populated usernames with the users
+    foreignField: 'username'
 });
 
 const Chat = new mongoose.model("chat", chatSchema);

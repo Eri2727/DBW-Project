@@ -77,7 +77,7 @@ app.get('/', (req, res) => {
     if(req.isAuthenticated()){
 
         //finds all chats that the users array include the req.user.username
-        Chat.find({ users : req.user.username }, (err, docs) => {
+        Chat.find({ usernames : req.user.username }, (err, docs) => {
             if(err) {
                 console.log(err);
                 res.render("index", {user: req.user, chats: []});
@@ -215,7 +215,7 @@ io.on('connect',function(socket,req, res){
         const newChat = new Chat({
             name: date.toLocaleString("pt"), //the date is the name in the beginning
             date: date, //date in which group was created
-            users: usernames, //usernames of people belonging to the group
+            usernames: usernames, //usernames of people belonging to the group
             messages: []
         });
 
@@ -229,29 +229,23 @@ io.on('connect',function(socket,req, res){
 
     socket.on("getChat", (chatId) => {
 
-        UserController.getUserImages(chatId, (users, chat, err) => {
-
-            let userList = [];
-            users.forEach(user => {
-                userList.push(user.username);
-            })
+        UserController.getUserImages(chatId, (chat, err) => {
 
             if(err) {
                 console.log(err);
-            } else if (!userList.includes(socket.request.user.username)){
+            } else if (!chat.users.some(user => user.username === socket.request.user.username)){
                 let me = socket.request.user.username;
 
                 io.to(me).emit('getChat', me, null, null);
             }
             else {
-                let userImage = {};
-
-                users.forEach(user => {
-                    userImage[user.username] = {
+                //turns [user, user] into {{user1.username : user1.image}, ...} that way we can get the image through the username
+                let userImage = chat.users.reduce((accumulator, user) => ({...accumulator ,
+                    [user.username] : {
                         data: user.image.img.data.toString('base64'),
-                        contentType: user.image.contentType
-                    };
-                });
+                        contentType: user.image.img.contentType
+                    }
+                }));
 
                 let me = socket.request.user.username;
 
@@ -267,7 +261,7 @@ io.on('connect',function(socket,req, res){
         Chat.findById(chatId, (err, chat) => {
             if(err) {
                 console.log(err);
-            } else if(!chat.users.includes(socket.request.user.username)){
+            } else if(!chat.usernames.some(user => user === socket.request.user.username)){
                 let me = socket.request.user.username;
 
                 //If the user that is trying to send a msg doesnt belong to the chat, its gonna show "Dont be a smart ass
@@ -287,7 +281,7 @@ io.on('connect',function(socket,req, res){
                 chat.save();
 
                 //send the message to everyone
-                chat.users.forEach(username => {
+                chat.usernames.forEach(username => {
                     io.to(username).emit('newMessage', message, chatId, me);
                 })
             }

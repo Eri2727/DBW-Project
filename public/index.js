@@ -216,10 +216,16 @@ socket.on("getChat", (me, chat, userImage) => {
 
         });
 
-        $('#messageInput').html("<textarea rows=\"2\" class=\"form-control\" autocomplete=\"off\" id=\"message\" placeholder=\"Type your message here\" ></textarea>\n" +
+        $('#messageInput').html("<div class='form-control'><div id='replied-message'></div><textarea rows=\"2\" class=\"form-control\" autocomplete=\"off\" id=\"message\" placeholder=\"Type your message here\" ></textarea></div>\n" +
             "        <button class=\"btn btn-outline-secondary\" type=\"button\" id=\"sendMessage\"><i class=\"far fa-paper-plane\"></i></button>");
 
     }
+
+    $('#messages').scrollTop = $('#messages').scrollHeight;
+
+    $('#messages').animate({
+        scrollTop: $("#messages").offset().bottom
+    }, 2000);
 
 });
 
@@ -288,11 +294,53 @@ function appendMessage(message){
 
     let image = userImages[message.sender].data;
 
-    $("#messages").append("<div class=\"message\"" + sentClass + ">\n" +
+
+    $("#messages").append("<div class=\"message" + sentClass + "\">\n" +
         "            <img  src=\"data:/" + userImages[message.sender].contentType + ";base64," +
         image + "\" alt=\"Avatar\">\n" +
         "            <p>" + message.body + "</p>\n" +
         "            <span class=\"name-left\">" + message.sender + "</span>\n" +
         "            <span class=\"time-right\">" + timeStamp + "</span>\n" +
+        "            <button class=\"btn reply-btn\" title='Reply'>\n" +
+        "                   <i class=\"fas fa-reply\"></i>\n" +
+        "            </button>\n" +
+        "            <button class=\"btn share-btn\" title='Share'>\n" +
+        "                   <i class=\"fas fa-share\"></i>\n" +
+        "            </button> " +
         "        </div>");
 }
+
+//Reply to message
+$("#messages").on("click", '.reply-btn', function () {
+
+    //reply = div of the message that the button was clicked
+    let reply = $(this).parent().prop('outerHTML')
+
+    reply = reply.replace("<button class=\"btn reply-btn\" title=\"Reply\">\n" +
+        "                   <i class=\"fas fa-reply\" aria-hidden=\"true\"></i>\n" +
+        "            </button>\n" +
+        "            <button class=\"btn share-btn\" title=\"Share\">\n" +
+        "                   <i class=\"fas fa-share\" aria-hidden=\"true\"></i>\n" +
+        "            </button>","");
+
+
+    $("#replied-message").html(reply);
+    //reply is the message in html
+
+    //change height and insert the button in the replied message
+    $('#messages').css('height', '50vh');
+    $('#replied-message').append("<button class=\"btn removeReply\" title=\"Remove Reply\">\n" +
+        "                   <i class=\"bi bi-x\"></i>\n" +
+        "            </button>");
+
+
+})
+
+$('#messageInput').on('click', '.removeReply', function () {
+
+    //clear the replied message div and change the height
+    $('#replied-message').html(null);
+
+    $('#messages').css('height', '67vh');
+
+});
