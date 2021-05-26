@@ -223,11 +223,7 @@ socket.on("getChat", (me, chat, userImage) => {
 
     }
 
-    $('#messages').scrollTop = $('#messages').scrollHeight;
-
-    $('#messages').animate({
-        scrollTop: $("#messages").offset().bottom
-    }, 2000);
+    scrollToLastMessage();
 
 });
 
@@ -263,7 +259,18 @@ socket.on('newMessage', (message, chatId) => {
         appendMessage(message);
     }
 
+    scrollToLastMessage();
+
 });
+
+function scrollToLastMessage(){
+    let offset = $('.message').last().offset();
+
+    $('html, #messages').animate({
+        scrollTop: offset.top,
+        scrollLeft: offset.left
+    }, 2000);
+}
 
 function appendMessage(message){
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -299,7 +306,7 @@ function appendMessage(message){
     let image = userImages[message.sender].data;
 
 
-    $("#messages").append("<div class=\"message" + sentClass + "\">\n" +
+    $("#messages").append("<div id='" + message._id + "' class=\"message" + sentClass + "\">\n" +
         "            <img  src=\"data:/" + userImages[message.sender].contentType + ";base64," +
         image + "\" alt=\"Avatar\">\n" +
         "            <p>" + message.body + "</p>\n" +
@@ -312,6 +319,7 @@ function appendMessage(message){
         "                   <i class=\"fas fa-share\"></i>\n" +
         "            </button> " +
         "        </div>");
+
 }
 
 //Reply to message
@@ -338,7 +346,6 @@ $("#messages").on("click", '.reply-btn', function () {
     $('#replied-message').append("<button class=\"btn removeReply\" title=\"Remove Reply\">\n" +
         "                   <i class=\"bi bi-x\"></i>\n" +
         "            </button>");
-
 
 });
 
