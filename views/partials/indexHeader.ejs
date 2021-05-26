@@ -6,18 +6,40 @@
         <span class="navbar-toggler-icon"></span>
     </button>
 
-    <ul class="navbar-nav px-3">
-        <li class="nav-item text-nowrap">
-            <div class="dropdown">
-                <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    <%= user.username %>
-                    <img class="userIcon" src="data:<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="dropdown image" class="img-responsive">
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end position-absolute">
-                    <li><a class="dropdown-item" href="/logout">Logout</a></li>
-                </ul>
-            </div>
-        </li>
-    </ul>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <ul class="navbar-nav px-3">
+            <li class="nav-item text-nowrap">
+                <div class="dropdown">
+                    <button id="invitesButton" class="btn btn-outline-light" data-bs-toggle="dropdown" aria-expanded="false"><i class="far fa-envelope"></i></button>
+                    <ul id="invites" class="dropdown-menu dropdown-menu-dark dropdown-menu-end position-absolute">
+
+                        <% if(invites.length === 0){ %>
+                        <li class="invite">
+                            No invites yet
+                        </li>
+                        <% } else {%>
+                        <% invites.forEach((invite) => { %>
+                                    <li class="invite">
+                                        <%= invite %>
+                                        <i class="bi bi-check-circle text-success accept"></i>
+                                        <i class="bi bi-x-circle text-danger refuse"></i>
+                                    </li>
+                        <% });} %>
+                    </ul>
+                </div>
+            </li>
+            <li class="nav-item text-nowrap">
+                <div class="dropdown">
+                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <%= user.username %>
+                        <img class="userIcon" src="data:<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="dropdown image" class="img-responsive">
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end position-absolute">
+                        <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </nav>
 </header>

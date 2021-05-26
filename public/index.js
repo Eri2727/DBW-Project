@@ -251,6 +251,8 @@ $("#messageInput").on("click", '#sendMessage', () => {
         socket.emit("newMessage", currentChat, messageBody);
     }
 
+    clearReply();
+
 });
 
 socket.on('newMessage', (message, chatId) => {
@@ -334,13 +336,19 @@ $("#messages").on("click", '.reply-btn', function () {
         "            </button>");
 
 
-})
+});
 
-$('#messageInput').on('click', '.removeReply', function () {
-
+function clearReply() {
     //clear the replied message div and change the height
     $('#replied-message').html(null);
 
     $('#messages').css('height', '67vh');
+}
+
+$('#messageInput').on('click', '.removeReply', function () {
+
+    clearReply();
 
 });
+
+

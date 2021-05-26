@@ -154,6 +154,9 @@ body {
 /*
  * Navbar
  */
+nav.navbar {
+    padding: 0;
+}
 
 .navbar-brand {
     padding-top: .75rem;
@@ -197,9 +200,60 @@ body {
 
 }
 
+ul.navbar-nav > li:first-child{
+    margin: 0 15px;
+}
+
+.nav-item div {
+    height: 100%;
+}
+
+.nav-item button {
+    border: 0;
+    height: 100%;
+}
+
+.invite {
+    padding: 5% 3%;
+    position: relative;
+}
+
+#invitesButton {
+    border: none;
+    border-radius: 0;
+}
+
+#invitesButton:focus {
+    box-shadow: none;
+    color: #000;
+    background-color: #f8f9fa;
+}
+
+.accept, .refuse{
+    cursor: pointer;
+}
+
+.accept {
+    position: absolute;
+    right: 15%;
+}
+
+.refuse {
+    position: absolute;
+    right: 0;
+}
+
+.invite ~ .invite {
+    border-top: solid white 1px;
+}
+
+#invites {
+    padding: 0 30% 0 15%;
+}
+
 .nav-item .dropdown-toggle {
     background-color: rgba(0, 0, 0, 0.25);
-    padding: 0 0 0 10%;
+    padding: 0 10% 0 10%;
     border: 0;
 }
 

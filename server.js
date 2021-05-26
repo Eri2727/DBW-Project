@@ -10,16 +10,17 @@ const http = require('http');
 const server = http.createServer(app);
 //------------------------------------------------------------------
 
-//CONTROLLERS-----------------------------------------
-const UserController = require('./controller/UserController');
-//----------------------------------------------------
-
 //MODELS----------------------------------------------
 const mongoConfigs = require('./model/mongooseConfigs');
 const User = require('./model/user');
 const upload = require('./model/multerConfigs');
 const Chat = require('./model/chat').Chat;
 const messageSchema = require('./model/chat').Message;
+//----------------------------------------------------
+
+//CONTROLLERS-----------------------------------------
+const UserController = require('./controller/UserController');
+const ChatController = require('./controller/ChatController');
 //----------------------------------------------------
 
 //AUTHENTICATION
@@ -76,15 +77,14 @@ passport.deserializeUser(User.deserializeUser());
 app.get('/', (req, res) => {
     if(req.isAuthenticated()){
 
-        //finds all chats that the users array include the req.user.username
-        Chat.find({ usernames : req.user.username }, (err, docs) => {
+        ChatController.getChatAndInvites(req.user.username, (chats, invites, err) => {
             if(err) {
                 console.log(err);
-                res.render("index", {user: req.user, chats: []});
+                res.render("index", {user: req.user, chats: [], invites: []});
             } else {
-                res.render("index", {user: req.user, chats: docs});
+                res.render("index", {user: req.user, chats: chats, invites: invites});
             }
-        });
+        })
 
     } else {
         res.redirect("/login");
@@ -132,7 +132,7 @@ app.post("/register", upload.single('image'), capitalizeUsername, function (req,
         }
     }
 
-    User.register({username: req.body.username, image: image}, req.body.password, function(err, user){
+    User.register({username: req.body.username, image: image, invitesReceived: []}, req.body.password, function(err, user){
 
         if(err){
             //Use this on the register page
@@ -207,29 +207,30 @@ io.on('connect',function(socket,req, res){
 
     socket.on('newChat', (usernames) => {
 
-        //The array doesn't have the username of the user that creates the chat
-        usernames.push(socket.request.user.username);
+        let me = socket.request.user.username;
 
         const date = new Date(); // "day/month/year hour:min:seconds"
 
         const newChat = new Chat({
             name: date.toLocaleString("pt"), //the date is the name in the beginning
             date: date, //date in which group was created
-            usernames: usernames, //usernames of people belonging to the group
+            usernames: [me], //usernames of people belonging to the group
             messages: []
         });
 
         newChat.save();
 
         usernames.forEach(username => {
-            io.to(username).emit('appendChat', newChat);
+            io.to(username).emit('newInvite', newChat.name);
         });
+
+        io.to(me).emit('appendChat', newChat);
 
     });
 
     socket.on("getChat", (chatId) => {
 
-        UserController.getUserImages(chatId, (chat, err) => {
+        ChatController.getUserImages(chatId, (chat, err) => {
 
             if(err) {
                 console.log(err);

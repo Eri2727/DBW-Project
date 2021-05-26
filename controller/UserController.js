@@ -1,8 +1,11 @@
+const User = require('../model/user');
 const Chat = require('../model/chat').Chat;
 
-exports.getUserImages = (chatId, cb) =>
-    Chat.findById(chatId)
-    .populate('users')
-    .exec()
-    .then(chat => cb(chat))
-    .catch(err => cb(null, err));
+exports.getInvites = (username, cb) => {
+    User.findOne({username: username})
+        .populate({path: "invitesReceived", model: Chat})
+        .lean()
+        .exec()
+        .then(user => cb(user.invitesReceived))
+        .catch(err => cb(null,err));
+}

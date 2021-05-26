@@ -21,8 +21,8 @@ chatSchema.virtual('users', {
     foreignField: 'username'
 });
 
-const Chat = new mongoose.model("chat", chatSchema);
 const Message = new mongoose.model("message", messageSchema)
+const Chat = new mongoose.model("chat", chatSchema);
 
 module.exports = {
     Chat,
