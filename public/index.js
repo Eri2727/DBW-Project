@@ -352,3 +352,25 @@ $('#messageInput').on('click', '.removeReply', function () {
 });
 
 
+
+socket.on('newInvite' , (newName) => {
+
+    if($("#invites").text() === "No invites yet")
+        $("#invites").html(null);
+
+    $('#invites').append("<li class=\"invite\">\n" +
+                                                newName +
+        "                                    <i class=\"bi bi-check-circle text-success accept\"></i>\n" +
+        "                                    <i class=\"bi bi-x-circle text-danger refuse\"></i>\n" +
+        "                                </li>");
+
+    $(".dot").removeAttr('hidden');
+
+});
+
+$('#invites').on('click', '.accept', function() {
+
+    let inviteIndex = $(this).parent().parent().index();
+
+});
+

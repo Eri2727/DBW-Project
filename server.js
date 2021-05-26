@@ -82,7 +82,8 @@ app.get('/', (req, res) => {
                 console.log(err);
                 res.render("index", {user: req.user, chats: [], invites: []});
             } else {
-                res.render("index", {user: req.user, chats: chats, invites: invites});
+                let nameInvites = invites.map(invite => invite.name);
+                res.render("index", {user: req.user, chats: chats, invites: nameInvites});
             }
         })
 
@@ -221,6 +222,15 @@ io.on('connect',function(socket,req, res){
         newChat.save();
 
         usernames.forEach(username => {
+            User.findOne({username: username}, (err, user) => {
+                if(err)
+                    console.log(err);
+                else {
+                    user.invitesReceived.push(newChat._id);
+                    user.save();
+                }
+            });
+
             io.to(username).emit('newInvite', newChat.name);
         });
 
