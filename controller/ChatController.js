@@ -10,13 +10,13 @@ exports.getUserImages = (chatId, cb) =>
         .catch(err => cb(null, err));
 
 exports.getChatAndInvites = (username, cb) => {
-    UserController.getInvites(username, (invites, err) => {
+    UserController.getUser(username, (user, err) => {
         if(err){
             console.log(err)
             cb(null, null, err);
         } else {
             Chat.find({usernames: username})
-                .then(chats => cb(chats, invites))
+                .then(chats => cb(chats, user.invitesReceived))
                 .catch(err => cb(null, null, err))
         }
     });

@@ -298,6 +298,32 @@ io.on('connect',function(socket,req, res){
             }
         });
     });
+
+    socket.on("acceptChat", (inviteIndex) => {
+
+        let me = socket.request.user.username;
+
+        UserController.getUser(me, (user , err) => {
+            if(err){
+                console.log(err);
+            } else {
+
+                const chatAccepted = user.invitesReceived[inviteIndex];
+
+                //add username to the chat
+                Chat.updateOne(chatAccepted, {$push : {usernames: user.username}})
+                    .then((docs => {
+                        User.updateOne(user, {$pull : {invitesReceived: chatAccepted._id}})
+                            .then((doc) => {
+                                io.to(me).emit('appendChat', chatAccepted);
+                            })
+                            .catch(err => console.log(err));
+                    }))
+                    .catch(err => console.log(err));
+
+            }
+        });
+    });
 });
 
 server.listen(process.env.PORT || 3000,function(){

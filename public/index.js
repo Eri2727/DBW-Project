@@ -155,9 +155,11 @@ $('#createNewChat').on('click', () => {
 
 socket.on('appendChat', (chat) => {
 
+    console.log(chat, chat.id);
+
     const chatList = $("#chatList");
 
-    chatList.prepend("<li id=\"" + chat.id + "\" class=\"nav-item chatItem\">\n" +
+    chatList.prepend("<li id=\"" + chat._id + "\" class=\"nav-item chatItem\">\n" +
         "    <h6 class=\"chatTitle\">" + chat.name + "</h6>\n" +
         "</li>");
 
@@ -331,6 +333,8 @@ $("#messages").on("click", '.reply-btn', function () {
 
     //change height and insert the button in the replied message
     $('#messages').css('height', '50vh');
+
+    //add the button
     $('#replied-message').append("<button class=\"btn removeReply\" title=\"Remove Reply\">\n" +
         "                   <i class=\"bi bi-x\"></i>\n" +
         "            </button>");
@@ -370,7 +374,18 @@ socket.on('newInvite' , (newName) => {
 
 $('#invites').on('click', '.accept', function() {
 
+    //get the index of the li that had its button clicked (its the same index as in the database)
     let inviteIndex = $(this).parent().parent().index();
+
+    //remove the list item that was clicked
+    $(".invite").get(inviteIndex).remove();
+
+    //if there are no more invites, then remove the dot
+    if(($("#invites").html().trim() === "")){
+        $(".dot").hide()
+    }
+
+    socket.emit("acceptChat", inviteIndex);
 
 });
 

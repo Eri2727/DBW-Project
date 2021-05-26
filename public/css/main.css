@@ -1,5 +1,6 @@
 body {
     font-size: .875rem;
+
 }
 
 /*-----ScrollBar-------*/
@@ -135,21 +136,21 @@ body {
     font-size: 0.85rem;
 }
 
-.chatItem .lastMessage{
-    width: 20ch;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    font-family: 'Roboto', sans-serif;
-    font-size: 0.8rem;
-    margin: 0;
-}
+/*.chatItem .lastMessage{*/
+/*    width: 15ch;*/
+/*    overflow: hidden;*/
+/*    white-space: nowrap;*/
+/*    text-overflow: ellipsis;*/
+/*    font-family: 'Roboto', sans-serif;*/
+/*    font-size: 0.8rem;*/
+/*    margin: 0;*/
+/*}*/
 
-.chatItem .timeLastMessage {
-    opacity: 50%;
-    position: relative;
-    right: 3px;
-}
+/*.chatItem .timeLastMessage {*/
+/*    opacity: 50%;*/
+/*    position: relative;*/
+/*    right: 3px;*/
+/*}*/
 
 /*
  * Navbar
@@ -193,10 +194,11 @@ nav.navbar {
 }
 
 .userIcon {
-    width: 45px;
-    height: 45px;
+    width: 30px;
+    height: 30px;
     border-radius: 100%;
     object-fit:cover;
+    margin-left: 5px;
 
 }
 
@@ -249,7 +251,7 @@ ul.navbar-nav > li:first-child{
 }
 
 .invite p{
-    width: 15ch;
+    width: 16ch;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -259,12 +261,6 @@ ul.navbar-nav > li:first-child{
 #invites {
     padding: 0 30% 0 15%;
     width:220px;
-}
-
-.nav-item .dropdown-toggle {
-    background-color: rgba(0, 0, 0, 0.25);
-    padding: 0 10% 0 10%;
-    border: 0;
 }
 
 /*New Chat Pop Up*/
@@ -466,9 +462,9 @@ textarea {
     background-color: red;
     border-radius: 50%;
     display: inline-block;
-    position: relative;
-    top: -8px;
-    right: -20px;
+    position: absolute;
+    top: 8px;
+    right: 7px;
 }
 
 

@@ -2,11 +2,7 @@
 
     <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">Whatsdown</a>
 
-    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand navbar-dark bg-dark">
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
                 <div class="dropdown">
@@ -33,7 +29,7 @@
             </li>
             <li class="nav-item text-nowrap">
                 <div class="dropdown">
-                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button type="button" class="btn btn-sm btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         <%= user.username %>
                         <img class="userIcon" src="data:<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="dropdown image" class="img-responsive">
                         <span class="caret"></span>
