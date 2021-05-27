@@ -21,8 +21,10 @@ function checkFile(input) {
 
         reader.onload = function (e) {
 
-            $('#imageAdded').attr('src', e.target.result);
-            $('#imageAdded').removeAttr('hidden');
+            let previewImage = $('#imageAdded');
+
+            previewImage.attr('src', e.target.result);
+            previewImage.removeAttr('hidden');
         }
 
         reader.readAsDataURL(input.files[0]);
@@ -210,8 +212,6 @@ socket.on("getChat", (me, chat, userImage) => {
         //Clears the messages before appending
         $("#messages").html('');
 
-        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
         chat.messages.forEach(message => {
 
             appendMessage(message);
@@ -223,7 +223,7 @@ socket.on("getChat", (me, chat, userImage) => {
 
     }
 
-    scrollToLastMessage();
+    scrollToMessage();
 
 });
 
@@ -244,6 +244,8 @@ $("#messageInput").on("click", '#sendMessage', () => {
     let messageBody = $("#message").val();
     $("#message").val("");
 
+    console.log($('#replied-message').html()); //"" sem /"baksndfs" com
+
     //if the message has at least one non blank character
     if(messageBody.trim().length > 0){
         socket.emit("newMessage", currentChat, messageBody);
@@ -259,16 +261,19 @@ socket.on('newMessage', (message, chatId) => {
         appendMessage(message);
     }
 
-    scrollToLastMessage();
+    scrollToMessage();
 
 });
 
-function scrollToLastMessage(){
-    let offset = $('.message').last().offset();
+function scrollToMessage(id){
+    //if id is null then message to go to will be the last
+
+    let offset = (typeof id !== 'undefined') ? $('#' + id).offset() : $('.message').last().offset();
+
+    offset.top -= 20;
 
     $('html, #messages').animate({
-        scrollTop: offset.top,
-        scrollLeft: offset.left
+        scrollTop: offset.top
     }, 2000);
 }
 
@@ -326,7 +331,7 @@ function appendMessage(message){
 $("#messages").on("click", '.reply-btn', function () {
 
     //reply = div of the message that the button was clicked
-    let reply = $(this).parent().prop('outerHTML')
+    let reply = $(this).parent().prop('outerHTML');
 
     reply = reply.replace("<button class=\"btn reply-btn\" title=\"Reply\">\n" +
         "                   <i class=\"fas fa-reply\" aria-hidden=\"true\"></i>\n" +
@@ -338,6 +343,11 @@ $("#messages").on("click", '.reply-btn', function () {
 
     $("#replied-message").html(reply);
     //reply is the message in html
+
+    let messageInReply = $("#replied-message .message");
+
+    //change the id of the reply message so that it doesnt have the same id as the original message
+    messageInReply.attr('id', "r-" + messageInReply.attr('id'));
 
     //change height and insert the button in the replied message
     $('#messages').css('height', '50vh');
@@ -362,7 +372,13 @@ $('#messageInput').on('click', '.removeReply', function () {
 
 });
 
+$('#messageInput').on('click', '#replied-message .message', function (){
 
+    //get the id to scroll to (we need to remove the r- that we placed in the beginning of the id
+    let idToScroll = $(this).attr('id').replace('r-', '');
+
+    scrollToMessage(idToScroll);
+});
 
 socket.on('newInvite' , (newName) => {
 

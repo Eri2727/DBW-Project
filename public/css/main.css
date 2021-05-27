@@ -434,6 +434,7 @@ textarea {
 
 #replied-message .message {
     margin: 0;
+    cursor: pointer;
 }
 
 #messageInput {
