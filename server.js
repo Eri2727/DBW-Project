@@ -251,12 +251,11 @@ io.on('connect',function(socket,req, res){
             }
             else {
                 //turns [user, user] into {{user1.username : user1.image}, ...} that way we can get the image through the username
-                let userImage = chat.users.reduce((accumulator, user) => ({...accumulator ,
-                    [user.username] : {
+                let userImage = {};
+                userImage = Object.assign({}, ...chat.users.map((user) => ({[user.username]: {
                         data: user.image.img.data.toString('base64'),
                         contentType: user.image.img.contentType
-                    }
-                }));
+                    }})));
 
                 let me = socket.request.user.username;
 
