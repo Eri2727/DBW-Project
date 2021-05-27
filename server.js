@@ -88,26 +88,26 @@ app.get('/', (req, res) => {
         })
 
     } else {
-        res.redirect("/login");
+        res.render("authentication", {error: req.flash('error')});
     }
 
 });
 
-app.get("/login", function (req, res){
-    if(req.isAuthenticated()){
-        res.redirect("/");
-    } else {
-        res.render("login", {error: req.flash('error')});
-    }
-});
-
-app.get("/register", function (req, res){
-    if(req.isAuthenticated()){
-        res.redirect("/");
-    } else {
-        res.render('register', {error: ""});
-    }
-});
+// app.get("/login", function (req, res){
+//     if(req.isAuthenticated()){
+//         res.redirect("/");
+//     } else {
+//         res.render("login", {error: req.flash('error')});
+//     }
+// });
+//
+// app.get("/register", function (req, res){
+//     if(req.isAuthenticated()){
+//         res.redirect("/");
+//     } else {
+//         res.render('register', {error: ""});
+//     }
+// });
 
 app.get('/logout', function(req, res){
 
@@ -140,7 +140,7 @@ app.post("/register", upload.single('image'), capitalizeUsername, function (req,
             const msg = "Username already in use";
             res.render("register", {error: msg});
         } else {
-            passport.authenticate("local", {failureRedirect: "/register", failureFlash: true})(req, res, function() {
+            passport.authenticate("local", {failureRedirect: "/", failureFlash: true})(req, res, function() {
                 res.redirect("/");
             });
         }
@@ -153,7 +153,7 @@ function capitalizeUsername(req, res, next) {
     next();
 }
 
-app.post("/login", capitalizeUsername, passport.authenticate("local", {failureRedirect: "/login", failureFlash: true}), (req,res) => {
+app.post("/login", capitalizeUsername, passport.authenticate("local", {failureRedirect: "/", failureFlash: true}), (req,res) => {
     res.redirect("/");
 });
 
@@ -266,7 +266,7 @@ io.on('connect',function(socket,req, res){
 
     });
 
-    socket.on("newMessage", (chatId, messageBody) => {
+    socket.on("newMessage", (chatId, messageBody, replyId) => {
 
         Chat.findById(chatId, (err, chat) => {
             if(err) {
@@ -283,6 +283,7 @@ io.on('connect',function(socket,req, res){
                     sender: me,
                     body: messageBody,
                     date: new Date(),
+                    forwardedMessage: replyId //we can find the message with this id by using chat.messages.id(replyId)
                 });
 
                 chat.messages.push(message);
@@ -292,7 +293,7 @@ io.on('connect',function(socket,req, res){
 
                 //send the message to everyone
                 chat.usernames.forEach(username => {
-                    io.to(username).emit('newMessage', message, chatId, me);
+                    io.to(username).emit('newMessage', message, chatId);
                 })
             }
         });

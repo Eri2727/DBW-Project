@@ -415,14 +415,14 @@ textarea {
 
 .reply-btn {
     position: absolute;
-    top: -5px;
+    bottom: 50px;
     right: 40px;
     padding-right: 0;
 }
 
 .share-btn {
     position: absolute;
-    top: -5px;
+    bottom: 50px;
     right: 5px;
     padding-left: 0;
 }
@@ -454,6 +454,15 @@ textarea {
     position: absolute;
     top: -4px;
     right: 5px;
+}
+
+.message .message {
+    filter: drop-shadow(1px 2px 3px black);
+    margin: -8px -8px 25px -8px;
+}
+
+.message .message .btn{
+    display: none;
 }
 
 /*---- Notification Badge----*/

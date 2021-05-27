@@ -1,0 +1,89 @@
+<%- include('./partials/header.ejs') %>
+
+<div class="container">
+    <div class="box"></div>
+    <div class="container-forms">
+        <div class="container-info">
+            <div class="info-item">
+                <div class="table">
+                    <div class="table-cell">
+                        <p>
+                            Have an account?
+                        </p>
+                        <div class="btn">
+                            Sign in
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="table">
+                    <div class="table-cell">
+                        <p>
+                            Don't have an account?
+                        </p>
+                        <div class="btn">
+                            Sign Up
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-form">
+            <div class="form-item log-in">
+                <div class="table">
+
+                    <form class="table-cell" method="POST" action="/login">
+                        <img class="img-thumbnail umaLogo" src="https://www.satae.pt/wp-content/uploads/2020/08/UnivMadeira.jpg" alt="Logo img">
+
+                        <label for="inputLogInUsername" class="sr-only">Email address</label>
+                        <input type="text" id="inputLogInUsername" name="username" class="form-control form-top" placeholder="Username" required autofocus>
+
+                        <label for="inputLogInPassword" class="sr-only">Password</label>
+                        <input type="password" id="inputLogInPassword" name="password" class="form-control form-bottom" placeholder="Password" required>
+
+                        <% if(error) {%>
+                            <label for="subLogInButton" class="registerError"><%= error %></label>
+                        <% } %>
+
+                        <div>
+                            <button class="btn" id="subLogInButton" type="submit">Sign in</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+            <div class="form-item sign-up">
+                <div class="table">
+
+                    <form method="post" class="table-cell" action="/register" enctype="multipart/form-data">
+                        <label for="inputRegisterUsername" class="sr-only">Username</label>
+                        <input name="username" type="text" id="inputRegisterUsername" class="form-control form-middle" placeholder="Username" required>
+
+                        <label for="inputRegisterPassword" class="sr-only">Password</label>
+                        <input name="password" type="password" id="inputRegisterPassword" class="form-control form-middle" placeholder="Password" required>
+
+                        <label for="image" class="sr-only">Upload Image</label>
+                        <input type="file" id="inputImage" name="image" onchange="checkFile(this)" value="" required>
+
+                        <img id="imageAdded" class="form-control" src="" hidden>
+
+                        <% if(error) {%>
+                            <label for="subRegisterButton" class="registerError"><%= error %></label>
+                        <% } %>
+                        <div>
+                            <button class="btn" id="subRegisterButton" type="submit">Register</button>
+                        </div>
+                    </form>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--        <p class="mt-5 mb-3 text-muted">@ UMa 2021</p>-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="authentication.js"></script>
+
+<%- include('./partials/footer.ejs') %>

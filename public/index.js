@@ -1,36 +1,3 @@
-
-//Verifies the image that the user inputs as their profile picture
-function checkFile(input) {
-    var file = input.files[0];
-    var fileType = file["type"];
-    var validImageTypes = ["image/jpeg", "image/png"];
-
-    if ($.inArray(fileType, validImageTypes) < 0) {
-        alert("Invalid File. Please attach a valid .png or .jpeg file.");
-        $("#inputImage").val(null);
-        location.reload();
-    }
-    if(input.files[0].size >= 16777216){
-        alert("Image is too big. Max 16mb.");
-        $("#inputImage").val(null);
-        location.reload();
-    }
-
-    if (input.files && input.files[0] ) {
-        var reader = new FileReader();
-
-        reader.onload = function (e) {
-
-            let previewImage = $('#imageAdded');
-
-            previewImage.attr('src', e.target.result);
-            previewImage.removeAttr('hidden');
-        }
-
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-
 const socket = io();
 
 const usernames = [];
@@ -223,7 +190,10 @@ socket.on("getChat", (me, chat, userImage) => {
 
     }
 
-    scrollToMessage();
+    if(chat.messages.length !== 0){
+
+        scrollToMessage();
+    }
 
 });
 
@@ -238,20 +208,25 @@ $('#messageInput').on('keydown', '#message', (event) => {
 
 $("#messageInput").on("click", '#sendMessage', () => {
 
-    //chat id
+    //id of the replied message
+    let replyID = "";
+
+    if($('#replied-message .message').length !== 0)
+        replyID = $('#replied-message .message').attr('id').replace("r-","");
+
+    //ACABAR O REPLY E DEPOIS FAZER O RECUSAR INVITE
+
     let currentChat = window.sessionStorage.getItem("currentChat");
-
     let messageBody = $("#message").val();
-    $("#message").val("");
 
-    console.log($('#replied-message').html()); //"" sem /"baksndfs" com
+    $("#message").val("");
 
     //if the message has at least one non blank character
     if(messageBody.trim().length > 0){
-        socket.emit("newMessage", currentChat, messageBody);
-    }
+        clearReply();
+        socket.emit("newMessage", currentChat, messageBody, replyID);
 
-    clearReply();
+    }
 
 });
 
@@ -278,7 +253,6 @@ function scrollToMessage(id){
 }
 
 function appendMessage(message){
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
     let sentClass = "";
 
@@ -286,8 +260,46 @@ function appendMessage(message){
         sentClass = " sent";
     }
 
+
+
+    let image = userImages[message.sender].data;
+
+    let formattedMessage = "";
+
+    formattedMessage = "<div id='" + message._id + "' class=\"message" + sentClass + "\">\n";
+
+    if(message.forwardedMessage !== undefined  && message.forwardedMessage !== "" && message.forwardedMessage !== null) {
+
+        let aux = $('#' + message.forwardedMessage).clone();
+
+        aux.children(".message").remove();
+
+        formattedMessage += aux.prop('outerHTML');
+
+    }
+
+    formattedMessage += "<img  src=\"data:/" + userImages[message.sender].contentType + ";base64," +
+        image + "\" alt=\"Avatar\">\n" +
+        "            <p>" + message.body + "</p>\n" +
+        "            <span class=\"name-left\">" + message.sender + "</span>\n" +
+        "            <span class=\"time-right\">" + getTimeStamp(message) + "</span>\n" +
+        "            <button class=\"btn reply-btn\" title='Reply'>\n" +
+        "                   <i class=\"fas fa-reply\"></i>\n" +
+        "            </button>\n" +
+        "            <button class=\"btn share-btn\" title='Share'>\n" +
+        "                   <i class=\"fas fa-share\"></i>\n" +
+        "            </button> " +
+        "        </div>";
+
+    $("#messages").append(formattedMessage);
+
+}
+
+function getTimeStamp(message){
     let timeStamp = "";
     let messageDate = new Date(message.date);
+
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
     if ((new Date().getFullYear() - messageDate.getFullYear()) > 0) { //if more than a year has passed
         timeStamp = messageDate.getDate() + "/" + messageDate.getMonth() + 1 + "/" + messageDate.getFullYear();
@@ -308,23 +320,7 @@ function appendMessage(message){
         //timeStamp = hours:minutes;
     }
 
-    let image = userImages[message.sender].data;
-
-
-    $("#messages").append("<div id='" + message._id + "' class=\"message" + sentClass + "\">\n" +
-        "            <img  src=\"data:/" + userImages[message.sender].contentType + ";base64," +
-        image + "\" alt=\"Avatar\">\n" +
-        "            <p>" + message.body + "</p>\n" +
-        "            <span class=\"name-left\">" + message.sender + "</span>\n" +
-        "            <span class=\"time-right\">" + timeStamp + "</span>\n" +
-        "            <button class=\"btn reply-btn\" title='Reply'>\n" +
-        "                   <i class=\"fas fa-reply\"></i>\n" +
-        "            </button>\n" +
-        "            <button class=\"btn share-btn\" title='Share'>\n" +
-        "                   <i class=\"fas fa-share\"></i>\n" +
-        "            </button> " +
-        "        </div>");
-
+    return timeStamp;
 }
 
 //Reply to message
