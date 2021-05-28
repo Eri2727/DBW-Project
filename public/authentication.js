@@ -1,9 +1,9 @@
 
 $(".info-item .btn").on("click", function(){
-    $(".container").toggleClass("log-in");
+    $(".container-md").toggleClass("log-in");
 });
 $(".container-form .btn").on("click", function(){
-    $(".container").addClass("active");
+    $(".container-md").addClass("active");
 });
 
 function checkFile(input) {
@@ -14,16 +14,16 @@ function checkFile(input) {
     if ($.inArray(fileType, validImageTypes) < 0) {
         alert("Invalid File. Please attach a valid .png or .jpeg file.");
         $("#inputImage").val(null);
-        location.reload();
+        // location.reload();
     }
     if(input.files[0].size >= 16777216){
         alert("Image is too big. Max 16mb.");
         $("#inputImage").val(null);
-        location.reload();
+        // location.reload();
     }
 
     if (input.files && input.files[0] ) {
-        var reader = new FileReader();
+        const reader = new FileReader();
 
         reader.onload = function (e) {
 

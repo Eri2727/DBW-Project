@@ -80,8 +80,10 @@ app.get('/', (req, res) => {
         ChatController.getChatAndInvites(req.user.username, (chats, invites, err) => {
             if(err) {
                 console.log(err);
+                io.emit("ok");
                 res.render("index", {user: req.user, chats: [], invites: []});
             } else {
+                io.emit("ok");
                 let nameInvites = invites.map(invite => invite.name);
                 res.render("index", {user: req.user, chats: chats, invites: nameInvites});
             }
