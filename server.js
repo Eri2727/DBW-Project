@@ -48,7 +48,10 @@ app.set('view engine', 'ejs');
 const sessionMiddleware = session({
     secret: "supernova",
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie:{
+        maxAge: 1296000000 //15 days
+    }
 })
 
 app.use(sessionMiddleware);
@@ -80,36 +83,19 @@ app.get('/', (req, res) => {
         ChatController.getChatAndInvites(req.user.username, (chats, invites, err) => {
             if(err) {
                 console.log(err);
-                io.emit("ok");
+
                 res.render("index", {user: req.user, chats: [], invites: []});
             } else {
-                io.emit("ok");
                 let nameInvites = invites.map(invite => invite.name);
                 res.render("index", {user: req.user, chats: chats, invites: nameInvites});
             }
         })
 
     } else {
-        res.render("authentication", {error: req.flash('error')});
+        res.render("authentication", {error: req.flash('error'), register: ""});
     }
 
 });
-
-// app.get("/login", function (req, res){
-//     if(req.isAuthenticated()){
-//         res.redirect("/");
-//     } else {
-//         res.render("login", {error: req.flash('error')});
-//     }
-// });
-//
-// app.get("/register", function (req, res){
-//     if(req.isAuthenticated()){
-//         res.redirect("/");
-//     } else {
-//         res.render('register', {error: ""});
-//     }
-// });
 
 app.get('/logout', function(req, res){
 
@@ -119,6 +105,7 @@ app.get('/logout', function(req, res){
     }
 
     req.logout();
+    res.cookie("connect.sid", "", { expires: new Date() });
     res.redirect('/');
 });
 
@@ -140,9 +127,10 @@ app.post("/register", upload.single('image'), capitalizeUsername, function (req,
         if(err){
             //Use this on the register page
             const msg = "Username already in use";
-            res.render("register", {error: msg});
+            res.render("authentication", {error: msg, register: "log-in"});
         } else {
             passport.authenticate("local", {failureRedirect: "/", failureFlash: true})(req, res, function() {
+
                 res.redirect("/");
             });
         }
@@ -156,7 +144,10 @@ function capitalizeUsername(req, res, next) {
 }
 
 app.post("/login", capitalizeUsername, passport.authenticate("local", {failureRedirect: "/", failureFlash: true}), (req,res) => {
-    res.redirect("/");
+    setTimeout(() => {
+        res.redirect("/");
+    }, 1000);
+
 });
 
 const io = require('socket.io')(server);
@@ -176,7 +167,7 @@ io.use((socket, next) => {
     }
 });
 
-io.on('connect',function(socket,req, res){
+io.on('connect',function(socket){
 
     //This socket joins a room with the username
     //Basically each user is going to have a room

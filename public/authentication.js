@@ -1,9 +1,14 @@
 
 $(".info-item .btn").on("click", function(){
     $(".container-md").toggleClass("log-in");
+    $(".registerError").remove();
 });
+
 $(".container-form .btn").on("click", function(){
-    $(".container-md").addClass("active");
+
+    setTimeout(()=>{
+        $(".container-md").addClass("active");
+    }, 1000);
 });
 
 function checkFile(input) {
