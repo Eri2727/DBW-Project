@@ -227,7 +227,7 @@ io.on('connect',function(socket){
             io.to(username).emit('newInvite', newChat.name);
         });
 
-        io.to(me).emit('appendChat', newChat);
+        socket.emit('appendChat', newChat);
 
     });
 
@@ -252,7 +252,7 @@ io.on('connect',function(socket){
 
                 let me = socket.request.user.username;
 
-                io.to(me).emit('getChat', me, chat, userImage);
+                socket.emit('getChat', me, chat, userImage);
 
             }
         });
@@ -268,7 +268,7 @@ io.on('connect',function(socket){
                 let me = socket.request.user.username;
 
                 //If the user that is trying to send a msg doesnt belong to the chat, its gonna show "Dont be a smart ass
-                io.to(me).emit('getChat', me, null, null);
+                socket.emit('getChat', me, null, null);
             } else {
                 const me = socket.request.user.username;
 
@@ -276,7 +276,7 @@ io.on('connect',function(socket){
                     sender: me,
                     body: messageBody,
                     date: new Date(),
-                    forwardedMessage: replyId //we can find the message with this id by using chat.messages.id(replyId)
+                    repliedMessage: replyId //we can find the message with this id by using chat.messages.id(replyId)
                 });
 
                 chat.messages.push(message);
@@ -308,7 +308,7 @@ io.on('connect',function(socket){
                     .then((docs => {
                         User.updateOne(user, {$pull : {invitesReceived: chatAccepted._id}})
                             .then((doc) => {
-                                io.to(me).emit('appendChat', chatAccepted);
+                                socket.emit('appendChat', chatAccepted);
                             })
                             .catch(err => console.log(err));
                     }))
@@ -316,6 +316,16 @@ io.on('connect',function(socket){
 
             }
         });
+    });
+
+    socket.on('refuseChat', inviteIndex => {
+        let me = socket.request.user.username;
+
+        UserController.removeInvite(me,inviteIndex, (err) => {
+            if(err)
+                console.log(err);
+        });
+
     });
 });
 

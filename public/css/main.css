@@ -413,18 +413,21 @@ textarea {
     resize: none;
 }
 
-.reply-btn {
+.message .btn {
     position: absolute;
-    bottom: 50px;
-    right: 40px;
-    padding-right: 0;
+    top: -15px;
+    padding: 0 3px;
+    border: 1px solid grey;
+    background-color: inherit;
+}
+
+.reply-btn {
+
+    right: 3rem;
 }
 
 .share-btn {
-    position: absolute;
-    bottom: 50px;
-    right: 5px;
-    padding-left: 0;
+    right: 1rem;
 }
 
 #replied-message {
@@ -461,8 +464,14 @@ textarea {
     margin: -8px -8px 25px -8px;
 }
 
-.message .message .btn{
-    display: none;
+.message + .message {
+    margin-top: 20px;
+}
+
+.message .messageBody {
+    overflow-wrap: break-word;
+    width: 75%;
+    display: flow-root;
 }
 
 /*---- Notification Badge----*/
@@ -478,3 +487,9 @@ textarea {
 }
 
 
+/*------Message Settings------*/
+
+.message-settings{
+
+
+}

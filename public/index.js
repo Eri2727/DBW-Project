@@ -185,7 +185,7 @@ socket.on("getChat", (me, chat, userImage) => {
 
         });
 
-        $('#messageInput').html("<div class='form-control'><div id='replied-message'></div><textarea rows=\"2\" class=\"form-control\" autocomplete=\"off\" id=\"message\" placeholder=\"Type your message here\" ></textarea></div>\n" +
+        $('#messageInput').html("<div class='form-control'><div id='replied-message'></div><textarea maxlength=\"132\" rows=\"2\" class=\"form-control\" autocomplete=\"off\" id=\"message\" placeholder=\"Type your message here\" ></textarea></div>\n" +
             "        <button class=\"btn btn-outline-secondary\" type=\"button\" id=\"sendMessage\"><i class=\"far fa-paper-plane\"></i></button>");
 
     }
@@ -236,7 +236,7 @@ socket.on('newMessage', (message, chatId) => {
         appendMessage(message);
     }
 
-    scrollToMessage();
+    scrollToMessage(message._id);
 
 });
 
@@ -245,7 +245,9 @@ function scrollToMessage(id){
 
     let offset = (typeof id !== 'undefined') ? $('#' + id).offset() : $('.message').last().offset();
 
-    offset.top -= 20;
+    if(id) {
+        offset.top -= 10;
+    }
 
     $('html, #messages').animate({
         scrollTop: offset.top
@@ -260,17 +262,19 @@ function appendMessage(message){
         sentClass = " sent";
     }
 
-
-
     let image = userImages[message.sender].data;
 
     let formattedMessage = "";
 
     formattedMessage = "<div id='" + message._id + "' class=\"message" + sentClass + "\">\n";
 
-    if(message.forwardedMessage !== undefined  && message.forwardedMessage !== "" && message.forwardedMessage !== null) {
+    if(message.repliedMessage !== undefined  && message.repliedMessage !== "" && message.repliedMessage !== null) {
 
-        let aux = $('#' + message.forwardedMessage).clone();
+        let aux = $('#' + message.repliedMessage).clone();
+
+        aux.attr('id', 'r-' + aux.attr('id'));
+
+        aux.children(".btn").remove();
 
         aux.children(".message").remove();
 
@@ -280,7 +284,7 @@ function appendMessage(message){
 
     formattedMessage += "<img  src=\"data:/" + userImages[message.sender].contentType + ";base64," +
         image + "\" alt=\"Avatar\">\n" +
-        "            <p>" + message.body + "</p>\n" +
+        "            <p class='messageBody'>" + message.body + "</p>\n" +
         "            <span class=\"name-left\">" + message.sender + "</span>\n" +
         "            <span class=\"time-right\">" + getTimeStamp(message) + "</span>\n" +
         "            <button class=\"btn reply-btn\" title='Reply'>\n" +
@@ -288,6 +292,9 @@ function appendMessage(message){
         "            </button>\n" +
         "            <button class=\"btn share-btn\" title='Share'>\n" +
         "                   <i class=\"fas fa-share\"></i>\n" +
+        "            </button> " +
+        "            <button class=\"btn message-settings dropdown-toggle\" title='Settings'>\n" +
+        "                       <i class=\"bi bi-stars\"></i>\n" +
         "            </button> " +
         "        </div>";
 
@@ -342,6 +349,8 @@ $("#messages").on("click", '.reply-btn', function () {
 
     let messageInReply = $("#replied-message .message");
 
+    messageInReply.children("div.message").remove();
+
     //change the id of the reply message so that it doesnt have the same id as the original message
     messageInReply.attr('id', "r-" + messageInReply.attr('id'));
 
@@ -352,6 +361,7 @@ $("#messages").on("click", '.reply-btn', function () {
     $('#replied-message').append("<button class=\"btn removeReply\" title=\"Remove Reply\">\n" +
         "                   <i class=\"bi bi-x\"></i>\n" +
         "            </button>");
+
 
 });
 
@@ -376,6 +386,12 @@ $('#messageInput').on('click', '#replied-message .message', function (){
     scrollToMessage(idToScroll);
 });
 
+$('#messages').on('click', '.message .message', function () {
+    let idToScroll = $(this).attr('id').replace('r-', '');
+
+    scrollToMessage(idToScroll);
+});
+
 socket.on('newInvite' , (newName) => {
 
     if($("#invites").text() === "No invites yet")
@@ -391,7 +407,7 @@ socket.on('newInvite' , (newName) => {
 
 });
 
-$('#invites').on('click', '.accept', function() {
+$('#invites').on('click', 'i', function() {
 
     //get the index of the li that had its button clicked (its the same index as in the database)
     let inviteIndex = $(this).parent().parent().index();
@@ -404,7 +420,11 @@ $('#invites').on('click', '.accept', function() {
         $(".dot").hide()
     }
 
-    socket.emit("acceptChat", inviteIndex);
+    if($(this).hasClass("accept"))
+        socket.emit("acceptChat", inviteIndex);
+    else if($(this).hasClass("refuse"))
+        socket.emit("refuseChat", inviteIndex);
+
 
 });
 
