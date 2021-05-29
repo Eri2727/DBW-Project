@@ -363,6 +363,12 @@ io.on('connect',function(socket){
         });
 
     });
+
+    socket.on("changeChatName", (currentChat, newTitle) => {
+        Chat.findByIdAndUpdate(currentChat, {name: newTitle})
+            .then()
+            .catch(err => console.log(err));
+    });
 });
 
 server.listen(process.env.PORT || 3000,function(){

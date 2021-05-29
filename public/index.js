@@ -135,7 +135,7 @@ socket.on('appendChat', (chat) => {
         senderLastMessage = chat.messages[chat.messages.length-1].sender;
     }
 
-    chatList.prepend("<li id=\"<%= chat.id %>\" class=\"nav-item chatItem\">\n" +
+    chatList.prepend("<li id=\"" + chat._id + "\" class=\"nav-item chatItem\">\n" +
         "    <h6 class=\"chatTitle\">"+ chat.name + "</h6>\n" +
         "    <span class=\"badge\">1</span>\n" +
         "    <p class=\"lastMessage\">\n" +
@@ -417,6 +417,8 @@ $('#messages').on('click', '.message .message', function () {
     scrollToMessage(idToScroll);
 });
 
+
+//Invite related stuff
 socket.on('newInvite' , (newName) => {
 
     if($("#invites").text() === "No invites yet")
@@ -454,3 +456,42 @@ $('#invites').on('click', 'i', function() {
 
 });
 
+//change chat name
+$('#changeChatName').on('click', () => {
+
+    let currentTitle = $('#chatTitle').text();
+
+    //Change title to input
+    $('#chatTitle').html('<input type="text" placeholder="'+ currentTitle +'" id="newChatName"><i class="bi bi-pencil changeName"></i><i class="bi bi-x cancelChangeName"></i>')
+
+    $('#chatTitle').trigger('focus');
+
+})
+
+
+$(document).on('keydown', (event) => {
+    if($('#chatTitle').children('input').length && event.key === 'Escape'){
+        $('#chatTitle .cancelChangeName').trigger('click');
+    } else if($('#chatTitle').children('input').length && event.key === 'Enter'){
+        $('#chatTitle .changeName').trigger('click');
+    }
+});
+
+$('#chatTitle').on('click', '.changeName', () => {
+
+    let newTitle = $('#chatTitle input').val();
+    if(newTitle !== "") {
+        $('#chatTitle').html(newTitle);
+        socket.emit("changeChatName", window.sessionStorage.getItem("currentChat"), newTitle);
+    }else {
+        alert("Can't change chat name to empty");
+    }
+
+});
+
+$('#chatTitle').on('click', '.cancelChangeName', () => {
+
+    let previousTitle = $('#chatTitle input').attr('placeholder');
+    $('#chatTitle').html(previousTitle);
+
+});
