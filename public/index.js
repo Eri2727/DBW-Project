@@ -241,9 +241,9 @@ socket.on('newMessage', (message, chatId) => {
 });
 
 function scrollToMessage(id){
-    //if id is null then message to go to will be the last
+    //if id is null then message to go to will be the last one
 
-    let top = (typeof id !== 'undefined') ? $('#' + id).position().top : $('#messages').children().last().position().top;
+    let top = (id !== undefined) ? $('#' + id).position().top : $('#messages').children().last().position().top;
 
     if(id) {
         top -= 150;
