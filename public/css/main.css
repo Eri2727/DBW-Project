@@ -423,11 +423,15 @@ textarea {
 
 .reply-btn {
 
-    right: 3rem;
+    right: 5rem;
 }
 
 .share-btn {
-    right: 1rem;
+    right: 3rem;
+}
+
+.message .message-settings{
+    right: 1rem
 }
 
 #replied-message {
@@ -486,10 +490,9 @@ textarea {
     right: 7px;
 }
 
+/*----- Message Settings -----*/
 
-/*------Message Settings------*/
-
-.message-settings{
-
-
+.message .dropdown {
+    top: -100%;
+    box-sizing: border-box;
 }

@@ -243,15 +243,17 @@ socket.on('newMessage', (message, chatId) => {
 function scrollToMessage(id){
     //if id is null then message to go to will be the last
 
-    let offset = (typeof id !== 'undefined') ? $('#' + id).offset() : $('.message').last().offset();
+    let top = (typeof id !== 'undefined') ? $('#' + id).position().top : $('#messages').children().last().position().top;
 
     if(id) {
-        offset.top -= 10;
+        top -= 150;
     }
 
+    console.log(top)
+
     $('html, #messages').animate({
-        scrollTop: offset.top
-    }, 2000);
+        scrollTop: $("#messages").scrollTop() + top
+    }, 1000);
 }
 
 function appendMessage(message){
@@ -274,9 +276,7 @@ function appendMessage(message){
 
         aux.attr('id', 'r-' + aux.attr('id'));
 
-        aux.children(".btn").remove();
-
-        aux.children(".message").remove();
+        aux.children(".btn, .message, div").remove();
 
         formattedMessage += aux.prop('outerHTML');
 
@@ -293,9 +293,15 @@ function appendMessage(message){
         "            <button class=\"btn share-btn\" title='Share'>\n" +
         "                   <i class=\"fas fa-share\"></i>\n" +
         "            </button> " +
-        "            <button class=\"btn message-settings dropdown-toggle\" title='Settings'>\n" +
+        "           <div class=\"dropdown\">\n" +
+        "                    <button class=\"btn message-settings\" title='Settings'>\n" +
         "                       <i class=\"bi bi-stars\"></i>\n" +
-        "            </button> " +
+        "                   </button>\n" +
+        "                    <ul class=\"dropdown-menu dropdown-menu-dark dropdown-menu-end position-absolute\">\n" +
+        "                        <li><a class=\"dropdown-item\">Sexy</a></li>\n" +
+        "                    </ul>\n" +
+        "           </div>" +
+        "             " +
         "        </div>";
 
     $("#messages").append(formattedMessage);
@@ -336,20 +342,14 @@ $("#messages").on("click", '.reply-btn', function () {
     //reply = div of the message that the button was clicked
     let reply = $(this).parent().prop('outerHTML');
 
-    reply = reply.replace("<button class=\"btn reply-btn\" title=\"Reply\">\n" +
-        "                   <i class=\"fas fa-reply\" aria-hidden=\"true\"></i>\n" +
-        "            </button>\n" +
-        "            <button class=\"btn share-btn\" title=\"Share\">\n" +
-        "                   <i class=\"fas fa-share\" aria-hidden=\"true\"></i>\n" +
-        "            </button>","");
-
 
     $("#replied-message").html(reply);
     //reply is the message in html
 
     let messageInReply = $("#replied-message .message");
 
-    messageInReply.children("div.message").remove();
+    messageInReply.children("div, button").remove();
+
 
     //change the id of the reply message so that it doesnt have the same id as the original message
     messageInReply.attr('id', "r-" + messageInReply.attr('id'));
@@ -362,6 +362,7 @@ $("#messages").on("click", '.reply-btn', function () {
         "                   <i class=\"bi bi-x\"></i>\n" +
         "            </button>");
 
+    $("#message").trigger("focus");
 
 });
 
