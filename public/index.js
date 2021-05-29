@@ -158,6 +158,7 @@ if(!window.sessionStorage.getItem("currentChat")) {
 //Loads the chat that was selected before the reload
 let currentChat = window.sessionStorage.getItem("currentChat");
 if(currentChat !== "0"){
+    $(".chatSettings").removeAttr('hidden');
     socket.emit("getChat", currentChat);
 }
 
@@ -165,6 +166,8 @@ if(currentChat !== "0"){
 $('#chatList').on('click', '.chatItem', function() {
 
     window.sessionStorage.setItem("currentChat", $(this).attr('id'));
+
+    $(".chatSettings").removeAttr('hidden');
 
     $(this).children(".badge").text("");
 
@@ -495,3 +498,21 @@ $('#chatTitle').on('click', '.cancelChangeName', () => {
     $('#chatTitle').html(previousTitle);
 
 });
+
+
+
+$('#confirmLeave').on('click', () => {
+
+    let currentChat = window.sessionStorage.getItem("currentChat");
+
+    socket.emit('leaveChat', currentChat, function(){
+        $('#chatTitle').html("Choose a chat or create one");    //change title
+        $('.chatSettings').hide();   //hide settings
+        $('#confirmLeave').modal('hide');   //hide modal
+        window.sessionStorage.setItem("currentChat", "0");  //set currentChat to 0
+        $('#messages').html(null);  //clear messages
+        $('#messageInput').html(null);  //clear messages
+        $('#' + currentChat).remove();
+    });
+
+})

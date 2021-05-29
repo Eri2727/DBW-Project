@@ -369,6 +369,12 @@ io.on('connect',function(socket){
             .then()
             .catch(err => console.log(err));
     });
+
+    socket.on("leaveChat", (currentChat, cb) => {
+        Chat.findByIdAndUpdate(currentChat, {$pull : {usernames: socket.request.user.username}})
+            .then(cb())
+            .catch(err => console.log(err));
+    })
 });
 
 server.listen(process.env.PORT || 3000,function(){
