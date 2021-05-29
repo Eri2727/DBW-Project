@@ -23,10 +23,11 @@ const UserController = require('./controller/UserController');
 const ChatController = require('./controller/ChatController');
 //----------------------------------------------------
 
-//AUTHENTICATION
+//AUTHENTICATION-----------------------------------------
 const passport = require('passport');
 const session = require('express-session');
-//
+const passportOneSessionPerUser = require('passport-one-session-per-user');
+//-------------------------------------------------------
 
 //OTHERS---------------------
 const url = require('url');
@@ -71,6 +72,11 @@ mongoose.set('useCreateIndex', true)
 //passport uses the Strategy from PassportLocalMongoose that hashes the password
 passport.use(User.createStrategy());
 
+//only permit one session per user
+//if the user is logged in elsewhere, then the older session is logged out
+passport.use(new passportOneSessionPerUser())
+app.use(passport.authenticate('passport-one-session-per-user'))
+
 //serializes is User info into a "key"
 passport.serializeUser(User.serializeUser());
 
@@ -87,7 +93,34 @@ app.get('/', (req, res) => {
                 res.render("index", {user: req.user, chats: [], invites: []});
             } else {
                 let nameInvites = invites.map(invite => invite.name);
-                res.render("index", {user: req.user, chats: chats, invites: nameInvites});
+
+                let changedChats = chats.map(function(chat){
+                    let timeStamp = "";
+                    let lastChanged = new Date(chat.lastChanged);
+
+                    if ((new Date().getFullYear() - lastChanged.getFullYear()) > 0) {
+                        timeStamp = lastChanged.getDate() + "/" + lastChanged.getMonth() + 1 + "/" + lastChanged.getFullYear();
+
+                    } else if ((new Date().getDate() - lastChanged.getDate()) > 0) {
+                        timeStamp = (new Date().getDate() - lastChanged.getDate()) + " days ago";
+                    } else {
+                        timeStamp = lastChanged.toLocaleTimeString("pt", {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })
+                    }
+
+                    return {
+                        id: chat.id,
+                        name: chat.name, //name of the group
+                        date: chat.date, //date in which group was created
+                        lastChanged: timeStamp,  //date of last message
+                        usernames: chat.usernames, //usernames of people belonging to the chat
+                        messages: chat.messages
+                    }
+                });
+
+                res.render("index", {user: req.user, chats: changedChats, invites: nameInvites});
             }
         })
 
@@ -199,15 +232,16 @@ io.on('connect',function(socket){
 
     });
 
-    socket.on('newChat', (usernames) => {
+    socket.on('newChat', (usernames, chatName) => {
 
         let me = socket.request.user.username;
 
         const date = new Date(); // "day/month/year hour:min:seconds"
 
         const newChat = new Chat({
-            name: date.toLocaleString("pt"), //the date is the name in the beginning
+            name: chatName || date.toLocaleString("pt"), //the date is the name in the beginning
             date: date, //date in which group was created
+            lastChanged: date,
             usernames: [me], //usernames of people belonging to the group
             messages: []
         });
@@ -240,7 +274,7 @@ io.on('connect',function(socket){
             } else if (!chat.users.some(user => user.username === socket.request.user.username)){
                 let me = socket.request.user.username;
 
-                io.to(me).emit('getChat', me, null, null);
+                socket.emit('getChat', me, null, null);
             }
             else {
                 //turns [user, user] into {{user1.username : user1.image}, ...} that way we can get the image through the username
@@ -278,6 +312,8 @@ io.on('connect',function(socket){
                     date: new Date(),
                     repliedMessage: replyId //we can find the message with this id by using chat.messages.id(replyId)
                 });
+
+                chat.lastChanged = message.date;
 
                 chat.messages.push(message);
 

@@ -16,6 +16,7 @@ exports.getChatAndInvites = (username, cb) => {
             cb(null, null, err);
         } else {
             Chat.find({usernames: username})
+                .sort({lastChanged: "desc"}) //sorts the chats and sorts them by the ascended lastChanged
                 .then(chats => cb(chats, user.invitesReceived))
                 .catch(err => cb(null, null, err))
         }
