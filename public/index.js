@@ -167,7 +167,7 @@ $('#chatList').on('click', '.chatItem', function() {
 
     window.sessionStorage.setItem("currentChat", $(this).attr('id'));
 
-    $(".chatSettings").removeAttr('hidden');
+    $(".chatSettings").show();
 
     $(this).children(".badge").text("");
 
@@ -448,8 +448,13 @@ $('#invites').on('click', 'i', function() {
     //remove the list item that was clicked
     $(".invite").get(inviteIndex).remove();
 
+    let newBadgeNum = parseInt($("#invitesButton .badge").text()) - 1;
+
+    if(newBadgeNum === 0)
+        newBadgeNum = "";
+
     //if there are no more invites, then remove the dot
-    if(($("#invitesButton .badge").text(parseInt($("#invitesButton .badge").text()) - 1)));
+    if(($("#invitesButton .badge").text(newBadgeNum)));
 
     if($(this).hasClass("accept"))
         socket.emit("acceptChat", inviteIndex);
