@@ -369,7 +369,7 @@ ul.navbar-nav > li:first-child{
 
 .message {
     border: 2px solid #C2D4F4;
-    background-color: #E1EFF2;
+    background-color: #CDEFF2;
     border-radius: 5px;
     padding: 10px;
     margin: 10px;
@@ -378,8 +378,8 @@ ul.navbar-nav > li:first-child{
 
 /* sent chat container */
 .sent {
-    border-color: #f6a1b9;
-    background-color: #f7b2c6;
+    border-color: #F2A7B6;
+    background-color: #FFC5C8;
 }
 
 /* Clear floats */
@@ -444,7 +444,7 @@ textarea {
     position: absolute;
     top: -15px;
     padding: 0 3px;
-    border: 1px solid grey;
+    border: 1px solid lavender;
     background-color: inherit;
 }
 
@@ -457,9 +457,7 @@ textarea {
     right: 3rem;
 }
 
-.message .message-settings{
-    right: 1rem
-}
+
 
 #replied-message {
     padding: 0;
@@ -529,10 +527,115 @@ textarea {
     cursor: pointer;
 }
 
+/*----- Message Reactions -----*/
 
-/*----- Message Settings -----*/
-
-.message .dropdown {
-    top: -100%;
-    box-sizing: border-box;
+.reactions{
+    background-color: inherit;
 }
+
+a.reaction-icon{
+    position: relative;
+    right:1rem;
+    align-items: center;
+    justify-content: center;
+    background-color:inherit ;
+    padding-top: 50px;
+}
+
+ a.reaction-icon .reaction-icon-tooltip {
+    padding: 5px 12px;
+    background: inherit;
+    color: #ffffff;
+    display: block;
+    position: absolute;
+    top: -25px;
+    font-size: .7rem;
+    z-index: 100;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px; }
+
+a.reaction-icon .reaction-icon-tooltip :before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -5px;
+    margin-left: -3px;
+    width: 0;
+    height: 0;
+}
+
+a.reaction-icon .reaction-drop{
+    padding: 5px;
+    margin-bottom: 5px;
+    background: white;
+    border: 1px solid #e1e8f3;
+    display: none;
+    position: absolute;
+    bottom: 18px;
+    right: 0;
+    width: 240px;
+    z-index: 100;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+ a.reaction-icon .reaction-drop ::before{
+    content: '';
+    position: absolute;
+    display: block;
+    right: 13px;
+    bottom: -6px;
+    width: 12px;
+    height: 12px;
+    transform: rotate(45deg);
+    background: inherit;
+    border-bottom: 1px solid #e1e8f3;
+    border-right: 1px solid #e1e8f3;
+}
+
+
+
+ a.reaction-icon .reaction-drop .reaction-list{
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+a.reaction-icon .reaction-drop .reaction-list span{
+    font-size: 1.2rem;
+    padding: 10px;
+    margin: 1px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+ a.reaction-icon .reaction-drop .reaction-list span:hover {
+    background: lavender;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+ }
+
+ a.reaction-icon:hover {
+    background: white ;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+     display: block;
+ }
+
+ a.reaction-icon:hover .reaction-icon-tooltip {
+    display: flex;
+ }
+
+ a.reaction-icon:hover .reaction-drop {
+    display: block;
+ }
+
+
