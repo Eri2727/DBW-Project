@@ -158,7 +158,7 @@ if(!window.sessionStorage.getItem("currentChat")) {
 //Loads the chat that was selected before the reload
 let currentChat = window.sessionStorage.getItem("currentChat");
 if(currentChat !== "0"){
-    $(".chatSettings").removeAttr('hidden');
+    $(".chatSettings").show();
     socket.emit("getChat", currentChat);
 }
 
