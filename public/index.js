@@ -293,15 +293,31 @@ function appendMessage(message){
         "            <button class=\"btn share-btn\" title='Share'>\n" +
         "                   <i class=\"fas fa-share\"></i>\n" +
         "            </button> " +
-        "           <div class=\"dropdown\">\n" +
-        "                    <button class=\"btn message-settings\" title='Settings'>\n" +
-        "                       <i class=\"bi bi-stars\"></i>\n" +
-        "                   </button>\n" +
-        "                    <ul class=\"dropdown-menu dropdown-menu-dark dropdown-menu-end position-absolute\">\n" +
-        "                        <li><a class=\"dropdown-item\">Sexy</a></li>\n" +
-        "                    </ul>\n" +
-        "           </div>" +
-        "             " +
+        "            <div class=\"reactions\">\n" +
+        "              <a href=\"#\" class=\"btn reaction-icon\">\n"  +
+        "               <i class=\"bi bi-stars\"></i>\n" +
+        "               <div class=\"reaction-drop\">\n" +
+        "                 <div class=\"reaction-list\">\n" +
+        "                                       <span>&#128578;</span>\n" +
+        "										<span>&#128515;</span>\n" +
+        "										<span>&#128514;</span>\n" +
+        "										<span>&#128518;</span>\n" +
+        "										<span>&#128521;</span>\n" +
+        "										<span>&#128557;</span>\n" +
+        "										<span>&#128532;</span>\n" +
+        "										<span>&#128561;</span>\n" +
+        "										<span>&#128566;</span>\n" +
+        "										<span>&#128577;</span>\n" +
+        "										<span>&#128579;</span>\n" +
+        "                                       <span>&#129313;</span>\n" +
+        "										<span>&#129312;</span>\n" +
+        "										<span>&#128064;</span>\n" +
+        "										<span>&#128077;</span>\n" +
+        "										<span>&#128078;</span>\n" +
+        "										<span>&#128151;</span>\n" +
+        "					</div>" +
+        "				</div>" +
+        "			</a>" +
         "        </div>";
 
     $("#messages").append(formattedMessage);
