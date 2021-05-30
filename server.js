@@ -217,19 +217,41 @@ io.on('connect',function(socket){
     socket.on('request usernames',function(){
         const usernames = [];
 
-        User.find({}, function(err, users){
+        UserController.getUsernames((usernames, err) => {
+            if(err)
+                console.log(err);
+            else {
 
-            users.forEach(function(user){
-                usernames.push(user.username);
-            });
+                //removes self from list of recommendations
+                const indexOfSelf = usernames.indexOf(socket.request.user.username);
+                usernames.splice(indexOfSelf, 1);
 
-            const data = {
-                usernames: usernames,
-                currUser: socket.request.user.username
-            }
+                const data = {
+                    usernames: usernames,
+                    currUser: socket.request.user.username
+                }
 
-            io.emit("response usernames", data);
+                socket.emit("response usernames", data);            }
         });
+
+    });
+
+    socket.on("getOtherUsernames", (chatId, cb) => {
+
+        UserController.getUsernames((usernames, err) => {
+            if(err)
+                console.log(err);
+            else {
+                ChatController.getUsernamesInChat(chatId, (usernamesInChat, err) => {
+                    if(err)
+                        console.log(err);
+                    else {
+                        let resultantUsernames = usernames.filter(username => usernamesInChat.indexOf(username) === -1);    //Only the usernames of the users that are not in the chat remain
+                        cb(resultantUsernames, socket.request.user.username, usernamesInChat.toObject());
+                    }
+                });
+            }
+        })
 
     });
 
@@ -266,174 +288,191 @@ io.on('connect',function(socket){
 
     });
 
-    socket.on("getChat", (chatId) => {
+    socket.on("addToChat", (chatId, usernames) => {
 
-        ChatController.getUserImages(chatId, (chat, err) => {
+        usernames.forEach(username => {
+            User.updateOne({username: username}, {$push : {invitesReceived: chatId}})
+                .then((doc) => {
+                    Chat.findById(chatId)
+                        .then(chat => io.to(username).emit('newInvite', chat.name))
+                        .catch(err => console.log(err))
 
-            if(err) {
-                console.log(err);
-            } else if (!chat.users.some(user => user.username === socket.request.user.username)){
-                let me = socket.request.user.username;
-
-                socket.emit('getChat', me, null, null);
-            }
-            else {
-                //turns [user, user] into {{user1.username : user1.image}, ...} that way we can get the image through the username
-                let userImage = {};
-                userImage = Object.assign({}, ...chat.users.map((user) => ({[user.username]: {
-                        data: user.image.img.data.toString('base64'),
-                        contentType: user.image.img.contentType
-                    }})));
-
-                let me = socket.request.user.username;
-
-                socket.emit('getChat', me, chat, userImage);
-
-            }
-        });
-
-    });
-
-    socket.on("newMessage", (chatId, messageBody, replyId) => {
-
-        Chat.findById(chatId, (err, chat) => {
-            if(err) {
-                console.log(err);
-            } else if(!chat.usernames.some(user => user === socket.request.user.username)){
-                let me = socket.request.user.username;
-
-                //If the user that is trying to send a msg doesnt belong to the chat, its gonna show "Dont be a smart ass
-                socket.emit('getChat', me, null, null);
-            } else {
-                const me = socket.request.user.username;
-
-                const message = new messageSchema({
-                    sender: me,
-                    body: messageBody,
-                    date: new Date(),
-                    repliedMessage: replyId, //we can find the message with this id by using chat.messages.id(replyId)
-                    reactions: []
-                });
-
-                chat.lastChanged = message.date;
-
-                chat.messages.push(message);
-
-                //save the message in the database
-                chat.save();
-
-                //send the message to everyone
-                chat.usernames.forEach(username => {
-                    io.to(username).emit('newMessage', message, chatId);
                 })
-            }
-        });
-    });
+                .catch(err => console.log(err));
 
-    socket.on("acceptChat", (inviteIndex) => {
-
-        let me = socket.request.user.username;
-
-        UserController.getUser(me, (user , err) => {
-            if(err){
-                console.log(err);
-            } else {
-
-                const chatAccepted = user.invitesReceived[inviteIndex];
-
-                //add username to the chat
-                Chat.updateOne(chatAccepted, {$push : {usernames: user.username}})
-                    .then((docs => {
-                        User.updateOne(user, {$pull : {invitesReceived: chatAccepted._id}})
-                            .then((doc) => {
-                                socket.emit('appendChat', chatAccepted);
-                            })
-                            .catch(err => console.log(err));
-                    }))
-                    .catch(err => console.log(err));
-
-            }
-        });
-    });
-
-    socket.on('refuseChat', inviteIndex => {
-        let me = socket.request.user.username;
-
-        UserController.removeInvite(me,inviteIndex, (err) => {
-            if(err)
-                console.log(err);
-        });
 
     });
 
-    socket.on("changeChatName", (currentChat, newTitle) => {
-        Chat.findByIdAndUpdate(currentChat, {name: newTitle})
-            .then()
-            .catch(err => console.log(err));
+});
+
+socket.on("getChat", (chatId) => {
+
+    ChatController.getUserImages(chatId, (chat, err) => {
+
+        if(err) {
+            console.log(err);
+        } else if (!chat.users.some(user => user.username === socket.request.user.username)){
+            let me = socket.request.user.username;
+
+            socket.emit('getChat', me, null, null);
+        }
+        else {
+            //turns [user, user] into {{user1.username : user1.image}, ...} that way we can get the image through the username
+            let userImage = {};
+            userImage = Object.assign({}, ...chat.users.map((user) => ({[user.username]: {
+                    data: user.image.img.data.toString('base64'),
+                    contentType: user.image.img.contentType
+                }})));
+
+            let me = socket.request.user.username;
+
+            socket.emit('getChat', me, chat, userImage);
+
+        }
     });
 
-    socket.on("leaveChat", (currentChat, cb) => {
-        Chat.findByIdAndUpdate(currentChat, {$pull : {usernames: socket.request.user.username}})
-            .then(cb())
-            .catch(err => console.log(err));
-    })
+});
 
-    //add username to reaction if he isn't there yet || cb(usernames, washethere?)
-    socket.on("addReaction",(currentChat, messageId, emoji, cb) => {
-        Chat.findById(currentChat)
-            .then(chat => {
-                let message = chat.messages.id(messageId);
-                let indexOfReaction = -1;
+socket.on("newMessage", (chatId, messageBody, replyId) => {
 
-                message.reactions.find(function(reaction, index){
-                    if(reaction.emoji == emoji){
-                        indexOfReaction = index;
+    Chat.findById(chatId, (err, chat) => {
+        if(err) {
+            console.log(err);
+        } else if(!chat.usernames.some(user => user === socket.request.user.username)){
+            let me = socket.request.user.username;
+
+            //If the user that is trying to send a msg doesnt belong to the chat, its gonna show "Dont be a smart ass
+            socket.emit('getChat', me, null, null);
+        } else {
+            const me = socket.request.user.username;
+
+            const message = new messageSchema({
+                sender: me,
+                body: messageBody,
+                date: new Date(),
+                repliedMessage: replyId, //we can find the message with this id by using chat.messages.id(replyId)
+                reactions: []
+            });
+
+            chat.lastChanged = message.date;
+
+            chat.messages.push(message);
+
+            //save the message in the database
+            chat.save();
+
+            //send the message to everyone
+            chat.usernames.forEach(username => {
+                io.to(username).emit('newMessage', message, chatId);
+            })
+        }
+    });
+});
+
+socket.on("acceptChat", (inviteIndex) => {
+
+    let me = socket.request.user.username;
+
+    UserController.getUser(me, (user , err) => {
+        if(err){
+            console.log(err);
+        } else {
+
+            const chatAccepted = user.invitesReceived[inviteIndex];
+
+            //add username to the chat
+            Chat.updateOne({_id: chatAccepted._id.toString()}, {$push : {usernames: user.username}})
+                .then((docs => {
+                    User.updateOne(user, {$pull : {invitesReceived: chatAccepted._id}})
+                        .then((doc) => {
+                            socket.emit('appendChat', chatAccepted);
+                        })
+                        .catch(err => console.log(err));
+                }))
+                .catch(err => console.log(err));
+
+        }
+    });
+});
+
+socket.on('refuseChat', inviteIndex => {
+    let me = socket.request.user.username;
+
+    UserController.removeInvite(me,inviteIndex, (err) => {
+        if(err)
+            console.log(err);
+    });
+
+});
+
+socket.on("changeChatName", (currentChat, newTitle) => {
+    Chat.findByIdAndUpdate(currentChat, {name: newTitle})
+        .then()
+        .catch(err => console.log(err));
+});
+
+socket.on("leaveChat", (currentChat, cb) => {
+    Chat.findByIdAndUpdate(currentChat, {$pull : {usernames: socket.request.user.username}})
+        .then(cb())
+        .catch(err => console.log(err));
+})
+
+//add username to reaction if he isn't there yet || cb(usernames, washethere?)
+socket.on("addReaction",(currentChat, messageId, emoji, cb) => {
+    Chat.findById(currentChat)
+        .then(chat => {
+            let message = chat.messages.id(messageId);
+            let indexOfReaction = -1;
+
+            message.reactions.find(function(reaction, index){
+                if(reaction.emoji == emoji){
+                    indexOfReaction = index;
+                }
+            }); //if indexOfReaction is -1 then the reaction is not in the message yet
+
+            if (indexOfReaction === -1) {
+                if(message.reactions.length < 12){
+                    let newEmoji = {
+                        emoji: emoji,
+                        usernames: [socket.request.user.username]
                     }
-                }); //if indexOfReaction is -1 then the reaction is not in the message yet
 
-                if (indexOfReaction === -1) {
-                    if(message.reactions.length < 12){
-                        let newEmoji = {
-                            emoji: emoji,
-                            usernames: [socket.request.user.username]
-                        }
+                    message.reactions.push(newEmoji);
 
-                        message.reactions.push(newEmoji);
+                    chat.save();
+                    cb(newEmoji.usernames, true);
 
-                        chat.save();
-                        cb(newEmoji.usernames, true);
-
-                    } else {
-                        cb(null, false, true);
-                    }
-
-                } else {    //if this reaction exists in the message, check if this user already reacted with this
-                    let emoji = message.reactions[indexOfReaction];
-                    let usernameIndex = emoji.usernames.toObject().indexOf(socket.request.user.username);
-
-                    if (usernameIndex === -1) {  //if the user hasn't reacted with this yet
-                        emoji.usernames.push(socket.request.user.username);
-                        chat.save();
-
-                        cb(emoji.usernames.toObject(), true, false);
-                    } else {    //the user has already reacted with this emoji so false is sent, so his reaction is removed
-
-                        emoji.usernames.splice(usernameIndex, 1);
-
-                        if (emoji.usernames.length === 0)
-                            message.reactions.splice(indexOfReaction, 1);
-
-                        chat.save();
-
-                        cb(emoji.usernames.toObject(), false, false);
-                    }
-
+                } else {
+                    cb(null, false, true);
                 }
 
-            })
-            .catch(err => console.log(err));
+            } else {    //if this reaction exists in the message, check if this user already reacted with this
+                let emoji = message.reactions[indexOfReaction];
+                let usernameIndex = emoji.usernames.toObject().indexOf(socket.request.user.username);
 
-    });
+                if (usernameIndex === -1) {  //if the user hasn't reacted with this yet
+                    emoji.usernames.push(socket.request.user.username);
+                    chat.save();
+
+                    cb(emoji.usernames.toObject(), true, false);
+                } else {    //the user has already reacted with this emoji so false is sent, so his reaction is removed
+
+                    emoji.usernames.splice(usernameIndex, 1);
+
+                    if (emoji.usernames.length === 0)
+                        message.reactions.splice(indexOfReaction, 1);
+
+                    chat.save();
+
+                    cb(emoji.usernames.toObject(), false, false);
+                }
+
+            }
+
+        })
+        .catch(err => console.log(err));
+
+});
 });
 
 server.listen(process.env.PORT || 3000,function(){
