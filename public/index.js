@@ -541,6 +541,13 @@ $('#confirmLeave').on('click', () => {
 
 
 $("#messages").on('click', ".reactions span", function (){
-    console.log($(this).text());
+    let reactions = $(this).parents(".message").children(".reactions-given");
+
+    //if this reaction is already in there
+    if(reactions.text().indexOf($(this).text()) !== -1){
+
+    }else if
+
+
 
 });

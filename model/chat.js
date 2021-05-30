@@ -5,7 +5,10 @@ const messageSchema = new mongoose.Schema({
     sender: String, //username of the sender
     body: String, //the message
     date: Date, //date of creation
-    repliedMessage: String //id of the message that this one is replying to
+    repliedMessage: String, //id of the message that this one is replying to
+    reactions: [{
+        String: [String]
+    }] //reactions given to the message, key= emoji, value= usernames
 });
 
 const chatSchema = new mongoose.Schema({ //group of messages and people

@@ -7,7 +7,7 @@ body {
     width: 100%;
     height: 100%;
     font-family: "Roboto", sans-serif;
-    background-color: #5356ad;
+    background-color: #4F74BE;
     overflow: hidden;
 }
 
@@ -33,7 +33,7 @@ body {
     width: 600px;
     margin: 30px auto 0;
     height: 320px;
-    background-color: #999ede;
+    background-color: #8DB6EF;
     top: 50%;
     margin-top: -160px;
     -moz-transition: all 0.5s;
@@ -56,7 +56,7 @@ body {
     position: absolute;
     left: 152px;
     top: 50px;
-    background-color: #9297e0;
+    background-color: #8EC6F8;
     transform: rotateX(52deg) rotateY(15deg) rotateZ(-38deg);
     width: 300px;
     height: 285px;
@@ -66,7 +66,7 @@ body {
     transition: all 0.5s;
 }
 .container-md .box:after {
-    background-color: #a5aae4;
+    background-color: #A8D9FF;
     top: -10px;
     left: 80px;
     width: 320px;
@@ -167,7 +167,7 @@ body {
 }
 .container-md .container-form .btn {
     text-align:center;
-    box-shadow: 0 0 10px 1px #ff73b3;
+    box-shadow: 0 0 10px 1px #F7C1C8;
 
 
 }
