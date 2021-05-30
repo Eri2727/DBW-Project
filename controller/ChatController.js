@@ -22,3 +22,9 @@ exports.getChatAndInvites = (username, cb) => {
         }
     });
 }
+
+exports.getUsernamesInChat = (chatId, cb) => {
+    Chat.findById(chatId)
+        .then(chat => cb(chat.usernames))
+        .catch(err => cb(null, err));
+}

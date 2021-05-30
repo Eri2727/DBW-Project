@@ -319,7 +319,7 @@ ul.navbar-nav > li:first-child{
     background: #bbb;
 }
 
-#addedUsers {
+.addedUsers {
     margin-top: 4%;
     max-height: 60vh;
     overflow-y: scroll;
@@ -327,17 +327,17 @@ ul.navbar-nav > li:first-child{
     scrollbar-width: none;
 }
 
-#addedUsers::-webkit-scrollbar {
+.addedUsers::-webkit-scrollbar {
     display: none;
 }
 
-#addedUsers ul {
+.addedUsers ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
-#addedUsers li {
+.addedUsers li {
     border: 1px solid #ddd;
     background-color: #f6f6f6;
     padding: 1%;
@@ -349,11 +349,11 @@ ul.navbar-nav > li:first-child{
 }
 
 /*Selects all li after the 1st li (newChat users)*/
-#addedUsers li + li {
+.addedUsers li + li {
     margin-top: -1px;
 }
 
-#addedUsers li:hover {
+.addedUsers li:hover {
     background-color: #eee;
 }
 
@@ -450,14 +450,8 @@ textarea {
 
 .reply-btn {
 
-    right: 5rem;
-}
-
-.share-btn {
     right: 3rem;
 }
-
-
 
 #replied-message {
     padding: 0;

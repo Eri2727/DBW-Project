@@ -5,7 +5,7 @@ const usernames = [];
 //when the popup is closed
 $('.closeNewChat').on('click', () => {
     usernames.splice(0,usernames.length) //clears the array (usernames =[]) -> splice(index of where to start, number of items to delete)
-    $('#addedUsers ul').html(''); //clears the stuff inside the div
+    $('.addedUsers ul').html(''); //clears the stuff inside the div
     $('#newChatUsernameInput').val(''); //clears the username input
     $('.search-error-message').html(''); //removes error message
     $('#newChatName').val('');
@@ -34,25 +34,25 @@ $('#addUserButton').on('click', () => {
 
         if(data.currUser === capitalizedName){
 
-            $('.search-error-message').html('<div class="alert alert-danger" role="alert">' +
+            $('#newChat .search-error-message').html('<div class="alert alert-danger" role="alert">' +
                 '  You can\'t add yourself' +
                 '</div>');
 
 
         } else if (usernames.includes(capitalizedName)){
-            $('.search-error-message').html('<div class="alert alert-danger" role="alert">' +
+            $('#newChat .search-error-message').html('<div class="alert alert-danger" role="alert">' +
                 '  Username already added' +
                 '</div>');
 
         } else if(usernameList.includes(capitalizedName)){
-            $('#newChatUsernameInput').val(''); //clears the username input
+            $('#newChat #newChatUsernameInput').val(''); //clears the username input
 
             usernames.push(capitalizedName);
 
-            $('#addedUsers ul').append("<li>" + capitalizedName + "<input type='button' class=\"removeUser\" value='&times;'></input></li>");
+            $('#newChat .addedUsers ul').append("<li>" + capitalizedName + "<input type='button' class=\"removeUser\" value='&times;'></input></li>");
 
         } else {
-            $('.search-error-message').html("<div class=\"alert alert-warning\" role=\"alert\">" +
+            $('#newChat .search-error-message').html("<div class=\"alert alert-warning\" role=\"alert\">" +
                 "  User does not exist" +
                 "</div>");
         }
@@ -82,17 +82,13 @@ $("#newChatUsernameInput").on("focus" ,function (event){ //when is typing trigge
 
         const usernameList = data.usernames;
 
-        //removes self from list of recommendations
-        const indexOfSelf = usernameList.indexOf(data.currUser);
-        usernameList.splice(indexOfSelf, 1);
-
         let datalist = '';
         usernameList.forEach(element => {
             datalist += '<option>' + element + '</option>';
         });
         $(".input-group #userList").html('');
         //puts every username as a recommendation
-        $(".input-group #userList").html(datalist);
+        $(".input-group #inviteUserList").html(datalist);
         // $("#newChatUsernameInput").attr("list", usernameList);
     });
 
@@ -132,7 +128,7 @@ socket.on('appendChat', (chat) => {
 
     if(chat.messages[chat.messages.length-1] !== undefined){
         lastMessage = chat.messages[chat.messages.length-1].body;
-        senderLastMessage = chat.messages[chat.messages.length-1].sender;
+        senderLastMessage = chat.messages[chat.messages.length-1].sender + ": ";
     }
 
     chatList.prepend("<li id=\"" + chat._id + "\" class=\"nav-item chatItem\">\n" +
@@ -331,9 +327,6 @@ function appendMessage(message){
         "            <button class=\"btn reply-btn\" title='Reply'>\n" +
         "                   <i class=\"fas fa-reply\"></i>\n" +
         "            </button>\n" +
-        "            <button class=\"btn share-btn\" title='Share'>\n" +
-        "                   <i class=\"fas fa-share\"></i>\n" +
-        "            </button> " +
         "            <div class=\"reactions\">\n" +
         "              <a class=\"btn reaction-icon\">\n"  +
         "               <i class=\"bi bi-stars\"></i>\n" +
@@ -451,7 +444,7 @@ $('#messages').on('click', '.message .message', function () {
 //Invite related stuff
 socket.on('newInvite' , (newName) => {
 
-    if($("#invites").text() === "No invites yet")
+    if($("#invites").text().trim() === "No invites yet")
         $("#invites").html(null);
 
     $('#invites').append("<li class=\"invite\">\n" +
@@ -470,10 +463,13 @@ socket.on('newInvite' , (newName) => {
 $('#invites').on('click', 'i', function() {
 
     //get the index of the li that had its button clicked (its the same index as in the database)
-    let inviteIndex = $(this).parent().parent().index();
+    let inviteIndex = $(this).parent().index();
 
     //remove the list item that was clicked
-    $(".invite").get(inviteIndex).remove();
+    if($(".invite").length > 1)
+        $(".invite").get(inviteIndex).remove();
+    else
+        $(".invite").remove();
 
     let newBadgeNum = parseInt($("#invitesButton .badge").text()) - 1;
 
@@ -499,12 +495,12 @@ $('#changeChatName').on('click', () => {
     //Change title to input
     $('#chatTitle').html('<input type="text" placeholder="'+ currentTitle +'" id="newChatName"><i class="bi bi-pencil changeName"></i><i class="bi bi-x cancelChangeName"></i>')
 
-    $('#chatTitle').trigger('focus');
+    $('#chatTitle input').trigger('focus');
 
 })
 
 
-$(document).on('keydown', (event) => {
+$(document).on('keydown', "#chatTitle input", (event) => {
     if($('#chatTitle').children('input').length && event.key === 'Escape'){
         $('#chatTitle .cancelChangeName').trigger('click');
     } else if($('#chatTitle').children('input').length && event.key === 'Enter'){
@@ -637,4 +633,103 @@ $("#messages").on('mouseenter', ".reactions-given > span", function(){
 //hide after showing
 $("#messages").on('mouseleave', ".reactions-given > span", function(){
     $(this).children(".reaction-users").hide();
+})
+
+//Invite users
+$("#openInviteUsers").on('click', function(){
+
+    socket.emit("getOtherUsernames", window.sessionStorage.getItem("currentChat"), function(usernamesToBeAdded, me, usernamesInChat){
+        let datalist = '';
+        usernamesToBeAdded.forEach(element => {
+            datalist += '<option>' + element + '</option>';
+        });
+
+        $("#usersInChat ul").html(null);
+        usernamesInChat.forEach(username => {
+            $("#usersInChat ul").append("<li>" + username + "</li>");
+        })
+
+        $("#autocompleteUsernameList").html(datalist);
+    });
+
+});
+
+//get the autocomplete
+$("#addUserToInvite").on('click', function(){
+
+    socket.emit("getOtherUsernames", window.sessionStorage.getItem("currentChat"), function(usernamesToBeAdded, me, usernamesInChat){
+
+        let usernameInput = $("#inviteUsersUsernameInput").val();
+
+        const capitalizedName = usernameInput.charAt(0).toUpperCase() + usernameInput.slice(1).toLowerCase();
+
+        if(me === capitalizedName){
+
+            $('#inviteUsers .search-error-message').html('<div class="alert alert-danger" role="alert">' +
+                '  You can\'t add yourself' +
+                '</div>');
+
+
+        } else if (usernamesInChat.includes(capitalizedName) || usernames.includes(capitalizedName)){
+            $('#inviteUsers .search-error-message').html('<div class="alert alert-danger" role="alert">' +
+                '  Username already added' +
+                '</div>');
+
+        } else if(usernamesToBeAdded.includes(capitalizedName)){
+            $('#inviteUsers #inviteUsersUsernameInput').val(null); //clears the username input
+
+            usernames.push(capitalizedName);
+
+
+            $('#inviteUsers .addedUsers ul').append("<li>" + capitalizedName + "<input type='button' class=\"removeUser\" value='&times;'></input></li>");
+
+        } else {
+            $('#inviteUsers .search-error-message').html("<div class=\"alert alert-warning\" role=\"alert\">" +
+                "  User does not exist" +
+                "</div>");
+        }
+
+    });
+
+});
+
+$('#inviteUsers').on('click', '.removeUser', function() {
+    const usernameToBeRemoved = $(this).parent().text();
+    const usernameIndex = usernames.indexOf(usernameToBeRemoved);
+    usernames.splice(usernameIndex, 1);
+    $(this).parent().remove();
+});
+
+$("#inviteUsersUsernameInput").on('keydown', function(event){
+    if(event.key === 'Enter'){
+        $("#addUserToInvite").trigger('click');
+    }
+    if(event.key === 'Backspace'){
+        $('#inviteUsers .search-error-message').html(null);
+    }
+});
+
+$("#inviteUsers").on('keydown', (event) => {
+    if(event.key === 'Escape')
+        $('#inviteUsers .btn-danger').trigger('click');
+});
+
+$('#inviteUsers .btn-danger').on('click', () => {
+    $('#inviteUsers .search-error-message').html(null);
+    $('#inviteUsers ul').html(null);
+    $("#inviteUsersUsernameInput").val(null);
+    usernames.splice(0, usernames.length);
+
+});
+
+$('#inviteUsers .btn-primary').on('click', () => {
+
+    if(usernames.length === 0){
+        $('.search-error-message').html('<div class="alert alert-danger" role="alert">' +
+            'No one to add' + '</div>');
+    } else {
+        socket.emit("addToChat", window.sessionStorage.getItem("currentChat"), usernames);
+        $('#inviteUsers .btn-danger').trigger('click');
+    }
+
 });

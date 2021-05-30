@@ -19,3 +19,14 @@ exports.removeInvite = (username, index, cb) => {
         })
         .catch(err => cb(err));
 }
+
+exports.getUsernames = (cb) => {
+    User.find({})
+        .then(users =>{
+
+            let usernames = users.map(user => user.username);
+
+            cb(usernames);
+        })
+        .catch(err => cb(null,err));
+}
