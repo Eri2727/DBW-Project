@@ -28,17 +28,17 @@
                 </div>
             </li>
             <li class="nav-item text-nowrap">
+                <div class="dropdown">
+                    <button type="button" class="btn btn-sm btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <%= user.username %>
+                        <img class="userIcon" src="data:<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="dropdown image" class="img-responsive">
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end position-absolute">
+                        <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                    </ul>
                 </div>
             </li>
-        </ul>v class="dropdown">
-        <button type="button" class="btn btn-sm btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-            <%= user.username %>
-            <img class="userIcon" src="data:<%=user.image.img.contentType%>;base64,<%=user.image.img.data.toString('base64')%>" alt="dropdown image" class="img-responsive">
-            <span class="caret"></span>
-        </button>
-        <ul  class="dropdown-menu dropdown-menu-dark dropdown-menu-end position-absolute">
-            <li><a class="dropdown-item" href="/logout">Logout</a></li>
         </ul>
-        </div>
     </nav>
 </header>
