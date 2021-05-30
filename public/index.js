@@ -533,7 +533,7 @@ $('#chatTitle').on('click', '.cancelChangeName', () => {
 
 
 
-$('#confirmLeave').on('click', () => {
+$('#confirmLeaveButton').on('click', () => {
 
     let currentChat = window.sessionStorage.getItem("currentChat");
 
