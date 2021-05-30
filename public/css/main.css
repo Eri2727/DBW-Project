@@ -542,7 +542,7 @@ a.reaction-icon{
     padding-top: 50px;
 }
 
- a.reaction-icon .reaction-icon-tooltip {
+a.reaction-icon .reaction-icon-tooltip {
     padding: 5px 12px;
     background: inherit;
     color: #ffffff;
@@ -572,7 +572,7 @@ a.reaction-icon .reaction-drop{
     border: 1px solid #e1e8f3;
     display: none;
     position: absolute;
-    bottom: 18px;
+    top: 22px;
     right: 0;
     width: 240px;
     z-index: 100;
@@ -580,15 +580,13 @@ a.reaction-icon .reaction-drop{
     -moz-border-radius: 5px;
     border-radius: 5px;
 }
- a.reaction-icon .reaction-drop ::before{
-    content: '';
+a.reaction-icon .reaction-drop ::before{
     position: absolute;
     display: block;
     right: 13px;
     bottom: -6px;
     width: 12px;
     height: 12px;
-    transform: rotate(45deg);
     background: inherit;
     border-bottom: 1px solid #e1e8f3;
     border-right: 1px solid #e1e8f3;
@@ -596,7 +594,7 @@ a.reaction-icon .reaction-drop{
 
 
 
- a.reaction-icon .reaction-drop .reaction-list{
+a.reaction-icon .reaction-drop .reaction-list{
     display: flex;
     align-items: center;
     flex-direction: row;
@@ -615,27 +613,41 @@ a.reaction-icon .reaction-drop .reaction-list span{
 
 }
 
- a.reaction-icon .reaction-drop .reaction-list span:hover {
+a.reaction-icon .reaction-drop .reaction-list span:hover {
     background: lavender;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
- }
+}
 
- a.reaction-icon:hover {
+a.reaction-icon:hover {
     background: white ;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
-     display: block;
- }
-
- a.reaction-icon:hover .reaction-icon-tooltip {
-    display: flex;
- }
-
- a.reaction-icon:hover .reaction-drop {
     display: block;
- }
+}
 
+a.reaction-icon:hover .reaction-icon-tooltip {
+    display: flex;
+}
 
+a.reaction-icon:hover .reaction-drop {
+    display: block;
+}
+
+.reactions-given{
+    bottom: 3px;
+    position: absolute;
+    right: 10%;
+    width: 40%;
+    direction: rtl;
+
+}
+
+.reactions-given span{
+    border: 2px solid white;
+    border-radius: 4px;
+    padding: 2px;
+    cursor: pointer;
+}
