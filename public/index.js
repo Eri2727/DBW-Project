@@ -300,7 +300,7 @@ function appendMessage(message){
 
     formattedMessage = "<div id='" + message._id + "' class=\"message" + sentClass + "\">\n";
 
-    if(message.repliedMessage !== undefined  && message.repliedMessage !== "" && message.repliedMessage !== null) {
+    if(message.repliedMessage != null  && message.repliedMessage !== "") {
 
         let aux = $('#' + message.repliedMessage).clone();
 
@@ -312,11 +312,21 @@ function appendMessage(message){
 
     }
 
+    let reactions = "";
+    if(message.reactions){
+        message.reactions.forEach(reaction => {
+            let reactionHoverText = getUsernamesTextForReaction(reaction.usernames, reaction.emoji);
+
+            reactions += "<span>" + reaction.emoji + "<span class=\"badge\">" + reaction.usernames.length + "</span><div class='reaction-users'>" + reactionHoverText + "</div></span>"
+        });
+    }
+
     formattedMessage += "<img  src=\"data:/" + userImages[message.sender].contentType + ";base64," +
         image + "\" alt=\"Avatar\">\n" +
         "            <p class='messageBody'>" + message.body + "</p>\n" +
         "            <span class=\"name-left\">" + message.sender + "</span>\n" +
-        "            <div class=\"reactions-given\"><span>&#128578;</span></div>  " +
+        "            <div class=\"reactions-given\">" + reactions +
+        "            </div>  " +
         "            <span class=\"time-right\">" + getTimeStamp(message.date) + "</span>\n" +
         "            <button class=\"btn reply-btn\" title='Reply'>\n" +
         "                   <i class=\"fas fa-reply\"></i>\n" +
@@ -325,7 +335,7 @@ function appendMessage(message){
         "                   <i class=\"fas fa-share\"></i>\n" +
         "            </button> " +
         "            <div class=\"reactions\">\n" +
-        "              <a href=\"#\" class=\"btn reaction-icon\">\n"  +
+        "              <a class=\"btn reaction-icon\">\n"  +
         "               <i class=\"bi bi-stars\"></i>\n" +
         "               <div class=\"reaction-drop\">\n" +
         "                 <div class=\"reaction-list\">\n" +
@@ -351,7 +361,7 @@ function appendMessage(message){
         "			</a>" +
         "        </div>";
 
-    $("#messages").append(formattedMessage);
+    $("#messages").append(formattedMessage).show("slow");
 
 }
 
@@ -541,13 +551,90 @@ $('#confirmLeave').on('click', () => {
 
 
 $("#messages").on('click', ".reactions span", function (){
-    let reactions = $(this).parents(".message").children(".reactions-given");
+    $(this).parents(".reaction-drop").hide(500);
+    let message = $(this).parents(".message");
+    let reactions = message.children(".reactions-given");
+    let reaction = $(this).text();
 
-    //if this reaction is already in there
-    if(reactions.text().indexOf($(this).text()) !== -1){
+    //if message already has this reaction
+    let reactionInReactions = reactions.children("span:contains(" + reaction +")");
+    let reactionBadge = reactionInReactions.children(".badge");
+    let reactionHoverText = reactionInReactions.children(".reaction-users");
 
-    }else if
+    socket.emit("addReaction", window.sessionStorage.getItem("currentChat"), message.attr('id'), reaction, function(usernames, add, maxReactions) {
+        if(maxReactions){   //if message already has the max number of reactions (12)
+            //Says that the maximum number of reaction has been reached
+            let reactionsContent = reactions.html();
+            reactions.html("<p>Reached the maximum of reactions</p>");
+            setTimeout(() => {
+                reactions.html(reactionsContent);
+            }, 1000);
+        } else {
+            if (add) {
+                //if this emoji was already in the message
+                if (reactions.text().indexOf(reaction) !== -1) {
+                    reactionBadge.text(parseInt(reactionBadge.text()) + 1);
+                } else {
+                    reactions.append("<span>" + reaction + "<span class=\"badge\">1</span><div class='reaction-users'></div></span>");
 
+                }
+                reactionInReactions = reactions.children("span:contains(" + reaction + ")");
+                reactionHoverText = reactionInReactions.children(".reaction-users");
 
+                reactionHoverText.text(getUsernamesTextForReaction(usernames, reaction));
+            } else {
+                reactionBadge.text(parseInt(reactionBadge.text()) - 1);
+                if (parseInt(reactionBadge.text()) === 0) {
+                    reactionInReactions.remove();
+                }
+            }
+        }
+    });
 
+});
+
+$("#messages").on('click', '.reactions-given > span', function(){
+    let clickedText = $(this).text();
+
+    let emoji = [...clickedText][0];
+    $(this).parents(".message").children(".reactions").find(".reaction-drop span:contains(" + emoji + ")").trigger('click');
+});
+
+function getUsernamesTextForReaction(usernames, reaction){
+    let hoverText = "";
+    for (var usernameIndex = 0; usernameIndex < usernames.length - 2; usernameIndex++) {
+        hoverText += usernames[usernameIndex] + ", ";
+    }
+
+    if(hoverText !== "") {
+        hoverText.splice(hoverText.length - 2, 2); //Remove the ", " if the hoverText has already inserted users (has more than one user)
+        usernameIndex++;
+        hoverText += " and ";
+    }
+
+    hoverText += usernames[usernameIndex] + " reacted with " + reaction;
+
+    return hoverText;
+}
+
+//show and hide the options for reactions
+$("#messages").on('mouseenter', ".reaction-icon", function(){
+    $(this).children(".reaction-drop").show();
+});
+
+$("#messages").on('click', ".reaction-icon i", function(){
+    $(this).children(".reaction-drop").show();
+});
+
+$("#messages").on('mouseleave', ".reaction-icon", function(){
+    $(this).children(".reaction-drop").hide()
+});
+
+//show the users that reacted
+$("#messages").on('mouseenter', ".reactions-given > span", function(){
+    $(this).children(".reaction-users").show();
+});
+//hide after showing
+$("#messages").on('mouseleave', ".reactions-given > span", function(){
+    $(this).children(".reaction-users").hide();
 });
