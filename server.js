@@ -51,7 +51,8 @@ const sessionMiddleware = session({
     resave: false,
     saveUninitialized: false,
     cookie:{
-        maxAge: 1296000000 //15 days
+        maxAge: 1296000000, //15 days
+        sameSite: 'strict'
     }
 })
 
@@ -310,7 +311,8 @@ io.on('connect',function(socket){
                     sender: me,
                     body: messageBody,
                     date: new Date(),
-                    repliedMessage: replyId //we can find the message with this id by using chat.messages.id(replyId)
+                    repliedMessage: replyId, //we can find the message with this id by using chat.messages.id(replyId)
+                    reactions: []
                 });
 
                 chat.lastChanged = message.date;
@@ -375,6 +377,63 @@ io.on('connect',function(socket){
             .then(cb())
             .catch(err => console.log(err));
     })
+
+    //add username to reaction if he isn't there yet || cb(usernames, washethere?)
+    socket.on("addReaction",(currentChat, messageId, emoji, cb) => {
+        Chat.findById(currentChat)
+            .then(chat => {
+                let message = chat.messages.id(messageId);
+                let indexOfReaction = -1;
+
+                message.reactions.find(function(reaction, index){
+                    if(reaction.emoji == emoji){
+                        indexOfReaction = index;
+                    }
+                }); //if indexOfReaction is -1 then the reaction is not in the message yet
+
+                if (indexOfReaction === -1) {
+                    if(message.reactions.length < 12){
+                        let newEmoji = {
+                            emoji: emoji,
+                            usernames: [socket.request.user.username]
+                        }
+
+                        message.reactions.push(newEmoji);
+
+                        chat.save();
+                        cb(newEmoji.usernames, true);
+
+                    } else {
+                        cb(null, false, true);
+                    }
+
+                } else {    //if this reaction exists in the message, check if this user already reacted with this
+                    let emoji = message.reactions[indexOfReaction];
+                    let usernameIndex = emoji.usernames.toObject().indexOf(socket.request.user.username);
+
+                    if (usernameIndex === -1) {  //if the user hasn't reacted with this yet
+                        emoji.usernames.push(socket.request.user.username);
+                        chat.save();
+
+                        cb(emoji.usernames.toObject(), true, false);
+                    } else {    //the user has already reacted with this emoji so false is sent, so his reaction is removed
+
+                        emoji.usernames.splice(usernameIndex, 1);
+
+                        if (emoji.usernames.length === 0)
+                            message.reactions.splice(indexOfReaction, 1);
+
+                        chat.save();
+
+                        cb(emoji.usernames.toObject(), false, false);
+                    }
+
+                }
+
+            })
+            .catch(err => console.log(err));
+
+    });
 });
 
 server.listen(process.env.PORT || 3000,function(){

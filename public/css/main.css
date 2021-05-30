@@ -572,7 +572,7 @@ a.reaction-icon .reaction-drop{
     border: 1px solid #e1e8f3;
     display: none;
     position: absolute;
-    top: 22px;
+    top: 0px;
     right: 0;
     width: 240px;
     z-index: 100;
@@ -580,6 +580,11 @@ a.reaction-icon .reaction-drop{
     -moz-border-radius: 5px;
     border-radius: 5px;
 }
+
+.message:last-child .reaction-drop{
+    transform: translate(0, -50%);
+}
+
 a.reaction-icon .reaction-drop ::before{
     position: absolute;
     display: block;
@@ -591,8 +596,6 @@ a.reaction-icon .reaction-drop ::before{
     border-bottom: 1px solid #e1e8f3;
     border-right: 1px solid #e1e8f3;
 }
-
-
 
 a.reaction-icon .reaction-drop .reaction-list{
     display: flex;
@@ -632,17 +635,12 @@ a.reaction-icon:hover .reaction-icon-tooltip {
     display: flex;
 }
 
-a.reaction-icon:hover .reaction-drop {
-    display: block;
-}
-
 .reactions-given{
     bottom: 3px;
     position: absolute;
     right: 10%;
     width: 40%;
     direction: rtl;
-
 }
 
 .reactions-given span{
@@ -650,4 +648,27 @@ a.reaction-icon:hover .reaction-drop {
     border-radius: 4px;
     padding: 2px;
     cursor: pointer;
+    direction: initial;
+    margin-left: 1px;
+}
+
+.reactions-given .badge{
+    border: none;
+    color: black;
+}
+
+.reactions-given .reaction-users {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    display: none;
+    background-color: black;
+    color: white;
+    border-radius: 4px;
+    padding: 2px;
+    max-width: 40%;
+}
+
+.reactions-given p{
+    color: red;
 }
