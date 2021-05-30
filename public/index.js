@@ -316,6 +316,7 @@ function appendMessage(message){
         image + "\" alt=\"Avatar\">\n" +
         "            <p class='messageBody'>" + message.body + "</p>\n" +
         "            <span class=\"name-left\">" + message.sender + "</span>\n" +
+        "            <div class=\"reactions-given\"><span>&#128578;</span></div>  " +
         "            <span class=\"time-right\">" + getTimeStamp(message.date) + "</span>\n" +
         "            <button class=\"btn reply-btn\" title='Reply'>\n" +
         "                   <i class=\"fas fa-reply\"></i>\n" +
@@ -536,4 +537,17 @@ $('#confirmLeave').on('click', () => {
         $('#' + currentChat).remove();
     });
 
-})
+});
+
+
+$("#messages").on('click', ".reactions span", function (){
+    let reactions = $(this).parents(".message").children(".reactions-given");
+
+    //if this reaction is already in there
+    if(reactions.text().indexOf($(this).text()) !== -1){
+
+    }else if
+
+
+
+});
