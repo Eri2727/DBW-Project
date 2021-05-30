@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="JavaScriptLibraryMappings">
-    <file url="PROJECT" libraries="{@types/jquery, @types/mongoose, @types/passport, @types/passport-local-mongoose}" />
+    <file url="PROJECT" libraries="{@types/ejs, @types/jquery, @types/mongoose, @types/passport}" />
   </component>
 </project>

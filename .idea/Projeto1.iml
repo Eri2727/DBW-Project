@@ -13,5 +13,6 @@
     <orderEntry type="library" name="@types/jquery" level="application" />
     <orderEntry type="library" name="@types/passport" level="application" />
     <orderEntry type="library" name="@types/passport-local-mongoose" level="application" />
+    <orderEntry type="library" name="@types/ejs" level="application" />
   </component>
 </module>

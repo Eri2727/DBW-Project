@@ -1,5 +1,18 @@
 <% chats.forEach(chat => { %>
-<li id="<%= chat.id %>" class="nav-item chatItem">
-    <h6 class="chatTitle"><%= chat.name %></h6>
-</li>
-<% });%>
+    <li id="<%= chat.id %>" class="nav-item chatItem">
+        <h6 class="chatTitle"><%= chat.name %></h6>
+        <span class="badge"></span>
+        <p class="lastMessage">
+            <% let message = chat.messages[chat.messages.length-1]%>
+            <% if(message !== undefined) {%>
+                <span class="username"> <%= message.sender + ": " %></span>
+                <%= message.body %>
+            <%} else { %>
+                <span class="username"></span><%= "was created" %>
+            <% } %>
+        </p>
+        <p class="timeLastMessage">
+            <%=chat.lastChanged%>
+        </p>
+    </li>
+<% })%>

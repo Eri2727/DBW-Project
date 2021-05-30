@@ -7,7 +7,7 @@
             <li class="nav-item text-nowrap">
                 <div class="dropdown">
                     <button id="invitesButton" class="btn btn-outline-light" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="dot" <% if(invites.length === 0){ %>hidden<%}%>></span><i class="far fa-envelope"></i></button>
+                        <span class="badge"><%= invites.length===0 ? "" : invites.length %></span><i class="far fa-envelope"></i></button>
                     <ul id="invites" class="dropdown-menu dropdown-menu-dark dropdown-menu-end position-absolute">
 
                         <% if(invites.length === 0){ %>
@@ -17,11 +17,11 @@
                         <% } else {%>
                             <% invites.forEach((invite) => { %>
                                 <li class="invite">
-                                    <p>
+
                                     <%= invite %>
                                     <i class="bi bi-check-circle text-success accept"></i>
                                     <i class="bi bi-x-circle text-danger refuse"></i>
-                                    </p>
+
                                 </li>
                         <% });} %>
                     </ul>

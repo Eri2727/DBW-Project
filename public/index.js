@@ -8,13 +8,14 @@ $('.closeNewChat').on('click', () => {
     $('#addedUsers ul').html(''); //clears the stuff inside the div
     $('#newChatUsernameInput').val(''); //clears the username input
     $('.search-error-message').html(''); //removes error message
+    $('#newChatName').val('');
 });
 
 //if esc is pressed popup closes and triggers a click on the close
 $('#newChat').on('keydown', function(event){
-   if(event.key === 'Escape'){
-       $('.closeNewChat').trigger('click');
-   }
+    if(event.key === 'Escape'){
+        $('.closeNewChat').trigger('click');
+    }
 });
 
 //when you add a user it checks if its valid and adds it to the list
@@ -60,18 +61,15 @@ $('#addUserButton').on('click', () => {
 
 });
 
+//if Enter is clicked whilst inside text input then it triggers a click on the add user button || if user starts deleting text, error is removed if there is any
 $("#newChatUsernameInput").on('keydown', function(event){
     if(event.key == 'Backspace') {
         $('.search-error-message').html('');
     }
-});
-
-//if Enter is clicked whilst inside text input then it triggers a click on the add user button
-$("#newChatUsernameInput").on('keydown', function(event){
-   if(event.key == 'Enter') {
-       event.preventDefault();
-       $('#addUserButton').trigger('click');
-   }
+    if(event.key == 'Enter') {
+        event.preventDefault();
+        $('#addUserButton').trigger('click');
+    }
 });
 
 //when the username input box becomes focused asks and receives the usernames to autocomplete
@@ -79,7 +77,7 @@ $("#newChatUsernameInput").on("focus" ,function (event){ //when is typing trigge
 
     socket.emit("request usernames");
 
-    // when the usernames are received
+    // when the usernames are received (once, so that its not always receiving usernames)
     socket.once("response usernames", function (data) {
 
         const usernameList = data.usernames;
@@ -116,7 +114,11 @@ $('#createNewChat').on('click', () => {
             'You cannot create a chat with yourself.' + '</div>');
     } else {
 
-        socket.emit("newChat", usernames);
+        let chatName = $("#newChatName").val();
+
+        chatName = (chatName === "") ? null : chatName;
+
+        socket.emit("newChat", usernames, chatName);
 
     }
 
@@ -124,12 +126,24 @@ $('#createNewChat').on('click', () => {
 
 socket.on('appendChat', (chat) => {
 
-    console.log(chat, chat.id);
-
     const chatList = $("#chatList");
+    let senderLastMessage = "";
+    let lastMessage = "was created";
+
+    if(chat.messages[chat.messages.length-1] !== undefined){
+        lastMessage = chat.messages[chat.messages.length-1].body;
+        senderLastMessage = chat.messages[chat.messages.length-1].sender;
+    }
 
     chatList.prepend("<li id=\"" + chat._id + "\" class=\"nav-item chatItem\">\n" +
-        "    <h6 class=\"chatTitle\">" + chat.name + "</h6>\n" +
+        "    <h6 class=\"chatTitle\">"+ chat.name + "</h6>\n" +
+        "    <span class=\"badge\">1</span>\n" +
+        "    <p class=\"lastMessage\">\n" +
+        "<span class=\"username\">" + senderLastMessage + "</span>" + lastMessage +
+        "    </p>\n" +
+        "    <p class=\"timeLastMessage\">\n" +
+        getTimeStamp(chat.lastChanged) +
+        "    </p>\n" +
         "</li>");
 
     $('.closeNewChat').trigger('click');
@@ -144,6 +158,7 @@ if(!window.sessionStorage.getItem("currentChat")) {
 //Loads the chat that was selected before the reload
 let currentChat = window.sessionStorage.getItem("currentChat");
 if(currentChat !== "0"){
+    $(".chatSettings").removeAttr('hidden');
     socket.emit("getChat", currentChat);
 }
 
@@ -151,6 +166,10 @@ if(currentChat !== "0"){
 $('#chatList').on('click', '.chatItem', function() {
 
     window.sessionStorage.setItem("currentChat", $(this).attr('id'));
+
+    $(".chatSettings").show();
+
+    $(this).children(".badge").text("");
 
     socket.emit("getChat", $(this).attr('id'));
 
@@ -232,9 +251,22 @@ $("#messageInput").on("click", '#sendMessage', () => {
 
 socket.on('newMessage', (message, chatId) => {
 
+    let chat = $('#' + chatId);
+
+    //moves chat to the begining
+    $("#chatList").prepend(chat);
+    chat.children(".lastMessage").html("<span class=\"username\">" + message.sender + ":</span>" + " " + message.body);
+    chat.children(".timeLastMessage").text(getTimeStamp(message.date));
+
     if(window.sessionStorage.getItem("currentChat") === chatId){
         appendMessage(message);
+    } else {
+        let badge = chat.children(".badge");
+        let newBadgeNum = badge.text() === "" ? "1" : parseInt(badge.text()) + 1
+        badge.text(newBadgeNum);
     }
+
+
 
     scrollToMessage(message._id);
 
@@ -248,8 +280,6 @@ function scrollToMessage(id){
     if(id) {
         top -= 150;
     }
-
-    console.log(top)
 
     $('html, #messages').animate({
         scrollTop: $("#messages").scrollTop() + top
@@ -286,7 +316,7 @@ function appendMessage(message){
         image + "\" alt=\"Avatar\">\n" +
         "            <p class='messageBody'>" + message.body + "</p>\n" +
         "            <span class=\"name-left\">" + message.sender + "</span>\n" +
-        "            <span class=\"time-right\">" + getTimeStamp(message) + "</span>\n" +
+        "            <span class=\"time-right\">" + getTimeStamp(message.date) + "</span>\n" +
         "            <button class=\"btn reply-btn\" title='Reply'>\n" +
         "                   <i class=\"fas fa-reply\"></i>\n" +
         "            </button>\n" +
@@ -324,9 +354,9 @@ function appendMessage(message){
 
 }
 
-function getTimeStamp(message){
+function getTimeStamp(date){
     let timeStamp = "";
-    let messageDate = new Date(message.date);
+    let messageDate = new Date(date);
 
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -334,9 +364,6 @@ function getTimeStamp(message){
         timeStamp = messageDate.getDate() + "/" + messageDate.getMonth() + 1 + "/" + messageDate.getFullYear();
         //timeStamp = day/month/year
 
-    } else if ((new Date().getMonth() - messageDate.getMonth()) > 0) { // If a month has passed
-        timeStamp = messageDate.getDate() + " " + months[messageDate.getMonth()];
-        //timeStamp = day month
     } else if ((new Date().getDate() - messageDate.getDate()) > 0) { // if a day has passed
         timeStamp = (new Date().getDate() - messageDate.getDate()) + " days ago";
         //timeStamp = x days ago
@@ -409,18 +436,23 @@ $('#messages').on('click', '.message .message', function () {
     scrollToMessage(idToScroll);
 });
 
+
+//Invite related stuff
 socket.on('newInvite' , (newName) => {
 
     if($("#invites").text() === "No invites yet")
         $("#invites").html(null);
 
     $('#invites').append("<li class=\"invite\">\n" +
-                                                newName +
+        newName +
         "                                    <i class=\"bi bi-check-circle text-success accept\"></i>\n" +
         "                                    <i class=\"bi bi-x-circle text-danger refuse\"></i>\n" +
         "                                </li>");
 
-    $(".dot").removeAttr('hidden');
+    let badge = $("#invitesButton .badge");
+    let newBadgeNum = badge.text() === "" ? "1" : parseInt(badge.text()) + 1
+    badge.text(newBadgeNum);
+
 
 });
 
@@ -432,10 +464,13 @@ $('#invites').on('click', 'i', function() {
     //remove the list item that was clicked
     $(".invite").get(inviteIndex).remove();
 
+    let newBadgeNum = parseInt($("#invitesButton .badge").text()) - 1;
+
+    if(newBadgeNum === 0)
+        newBadgeNum = "";
+
     //if there are no more invites, then remove the dot
-    if(($("#invites").html().trim() === "")){
-        $(".dot").hide()
-    }
+    if(($("#invitesButton .badge").text(newBadgeNum)));
 
     if($(this).hasClass("accept"))
         socket.emit("acceptChat", inviteIndex);
@@ -445,3 +480,60 @@ $('#invites').on('click', 'i', function() {
 
 });
 
+//change chat name
+$('#changeChatName').on('click', () => {
+
+    let currentTitle = $('#chatTitle').text();
+
+    //Change title to input
+    $('#chatTitle').html('<input type="text" placeholder="'+ currentTitle +'" id="newChatName"><i class="bi bi-pencil changeName"></i><i class="bi bi-x cancelChangeName"></i>')
+
+    $('#chatTitle').trigger('focus');
+
+})
+
+
+$(document).on('keydown', (event) => {
+    if($('#chatTitle').children('input').length && event.key === 'Escape'){
+        $('#chatTitle .cancelChangeName').trigger('click');
+    } else if($('#chatTitle').children('input').length && event.key === 'Enter'){
+        $('#chatTitle .changeName').trigger('click');
+    }
+});
+
+$('#chatTitle').on('click', '.changeName', () => {
+
+    let newTitle = $('#chatTitle input').val();
+    if(newTitle !== "") {
+        $('#chatTitle').html(newTitle);
+        socket.emit("changeChatName", window.sessionStorage.getItem("currentChat"), newTitle);
+    }else {
+        alert("Can't change chat name to empty");
+    }
+
+});
+
+$('#chatTitle').on('click', '.cancelChangeName', () => {
+
+    let previousTitle = $('#chatTitle input').attr('placeholder');
+    $('#chatTitle').html(previousTitle);
+
+});
+
+
+
+$('#confirmLeave').on('click', () => {
+
+    let currentChat = window.sessionStorage.getItem("currentChat");
+
+    socket.emit('leaveChat', currentChat, function(){
+        $('#chatTitle').html("Choose a chat or create one");    //change title
+        $('.chatSettings').hide();   //hide settings
+        $('#confirmLeave').modal('hide');   //hide modal
+        window.sessionStorage.setItem("currentChat", "0");  //set currentChat to 0
+        $('#messages').html(null);  //clear messages
+        $('#messageInput').html(null);  //clear messages
+        $('#' + currentChat).remove();
+    });
+
+})

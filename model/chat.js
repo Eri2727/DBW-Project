@@ -11,6 +11,7 @@ const messageSchema = new mongoose.Schema({
 const chatSchema = new mongoose.Schema({ //group of messages and people
     name: String, //name of the group
     date: Date, //date in which group was created
+    lastChanged: Date,  //date of last message
     usernames: [String], //usernames of people belonging to the chat
     messages: [messageSchema]
 });
