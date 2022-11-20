@@ -1,0 +1,54 @@
+-------------------------------- Projeto Grupo 21--------------------------------
+
+○○○○○○○○○○○○○○○○○○○○○○○○○WHATSDOWN○○○○○○○○○○○○○○○○○○○○○○○○○○○
+
+
+---------> LOGIN/ REGISTER
+
+-> Cada user utiliza o username e a pass para entrar.
+-> O username é case insensitive.
+-> Os dados são serializados para proteção do user.
+-> Os dados são guardados com cookies.
+
+
+---------> NAVIGATION BAR
+
+-> Icon de envelope (com badge) com os invites de mensagens.
+-> Nome e icon do user, que servem como botão dropdown para logout.
+
+
+---------> CHAT LIST
+
+-> Lista de todas as conversas do user com badge de notificação para novas
+    mensagnes e hora.
+-> Botão para criação de menagem:
+    -> É sugerido ao utilizador usernames enquanto este escreve no input.
+    -> O utilizador não pode estar sozinho numa conversa.
+    -> Há a possibilidade de dar um nome ao chat que está a criar.
+
+
+----------> CHATS
+
+-> Mensagem enviada: rosa;
+-> Mensagem recebida: azul;
+-> Cada mensagem tem a opção de dar reply tanto como reagir com emojis.
+
+
+
+
+----------------------Users criados-------------------
+User:123
+Pass: 123
+
+User: Eri
+Pass: 123
+
+node server.js para começar
+
+-----------------------Webgrafia---------------------------------
+
+https://getbootstrap.com
+https://www.w3schools.com
+http://www.passportjs.org
+https://mongoosejs.com
+https://codepen.io/Anna_Batura/pen/QEAqyE
